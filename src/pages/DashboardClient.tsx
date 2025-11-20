@@ -59,7 +59,7 @@ export default function DashboardClient() {
         {/* Botón de acción principal */}
         <div className="mb-6">
           <button
-            onClick={handleRequestCredit}
+             // onClick={handleRequestCredit}
             className="bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors flex items-center space-x-2 shadow-md"
           >
             <Plus className="w-5 h-5" />
@@ -127,7 +127,7 @@ export default function DashboardClient() {
                       Comienza solicitando tu primer crédito
                     </p>
                     <button
-                      onClick={handleRequestCredit}
+                      //onClick={handleRequestCredit}
                       className="bg-primary-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors inline-flex items-center space-x-2"
                     >
                       <Plus className="w-5 h-5" />
