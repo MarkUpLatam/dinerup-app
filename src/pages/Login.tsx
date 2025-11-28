@@ -43,7 +43,7 @@ export default function Login() {
         return;
       }
 
-      const userRole = rawRole === 'cliente' ? 'client' : 'cooperative';
+      const userRole = rawRole === 'client' ? 'client' : 'cooperative';
 
       if (userRole !== data.userType) {
         setError(`Esta cuenta es de tipo ${rawRole}`);
