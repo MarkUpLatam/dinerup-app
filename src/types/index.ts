@@ -1,4 +1,4 @@
-export type UserType = 'client' | 'cooperative';
+export type UserType = "client" | "cooperative";
 
 export interface User {
   id: string;
@@ -27,7 +27,7 @@ export interface CreditRequest {
   amount: number;
   term: number;
   city: string;
-  status: 'pending' | 'approved' | 'rejected' | 'under_review';
+  status: "pending" | "approved" | "rejected" | "under_review";
   cooperativeId?: string;
   cooperativeName?: string;
   createdAt: Date;
