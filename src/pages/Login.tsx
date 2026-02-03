@@ -7,6 +7,7 @@ import { Building2, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import LogoDinerUp from '../images/LogoDinerUp.png';
 import CompleteRegistrationModal from '../components/auth/CompleteRegistrationModal';
+import PublicCreditRequestModal from '../components/PublicCreditRequestModal';
 
 // Schema de validación
 const loginSchema = z.object({
@@ -21,6 +22,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleteRegistration, setShowCompleteRegistration] = useState(false);
+  const [showCreditRequestModal, setShowCreditRequestModal] = useState(false);
+  const [creditRequestType, setCreditRequestType] = useState<"CREDITO" | "INVERSION">("CREDITO");
 
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
@@ -107,11 +110,23 @@ export default function Login() {
 
           {/* Botones de acción */}
           <div className="grid grid-cols-2 gap-4 mb-8">
-            <button className="bg-success hover:bg-opacity-80 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 duration-200 flex items-center justify-center gap-2">
+            <button 
+              onClick={() => {
+                setCreditRequestType("CREDITO");
+                setShowCreditRequestModal(true);
+              }}
+              className="bg-success hover:bg-opacity-80 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 duration-200 flex items-center justify-center gap-2"
+            >
               <span>Solicitar crédito</span>
               <span>→</span>
             </button>
-            <button className="bg-accent hover:bg-opacity-80 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 duration-200 flex items-center justify-center gap-2">
+            <button 
+              onClick={() => {
+                setCreditRequestType("INVERSION");
+                setShowCreditRequestModal(true);
+              }}
+              className="bg-accent hover:bg-opacity-80 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 duration-200 flex items-center justify-center gap-2"
+            >
               <span>Realizar inversión</span>
               <span>→</span>
             </button>
@@ -196,6 +211,13 @@ export default function Login() {
           }}
         />
       )}
+
+      {/* Modal de solicitud pública de crédito/inversión */}
+      <PublicCreditRequestModal
+        open={showCreditRequestModal}
+        onClose={() => setShowCreditRequestModal(false)}
+        type={creditRequestType}
+      />
     </div>
   );
 }
