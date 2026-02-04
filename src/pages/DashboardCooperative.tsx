@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import PreApprovalModal from "../components/PreApprovalModal";
 
 import {
   getMyCooperativeRequests,
@@ -47,6 +48,9 @@ export default function DashboardCooperative() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const [showPreApprovalModal, setShowPreApprovalModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] =
+    useState<CooperativeCreditRequest | null>(null);
 
   useEffect(() => {
     loadRequests();
@@ -84,6 +88,32 @@ export default function DashboardCooperative() {
     } finally {
       setProcessingId(null);
     }
+  };
+
+  /* =======================
+     PRE-APPROVAL HANDLER
+     ======================= */
+
+  const handleOpenPreApprovalModal = (request: CooperativeCreditRequest) => {
+    setSelectedRequest(request);
+    setShowPreApprovalModal(true);
+  };
+
+  const handleClosePreApprovalModal = () => {
+    setShowPreApprovalModal(false);
+    setSelectedRequest(null);
+  };
+
+  const handleApproveWithoutGuarantee = async (solicitudId: number) => {
+    await handleDecision(solicitudId, CreditDecision.PRE_APROBAR);
+  };
+
+  const handleApproveWithGuarantee = async (solicitudId: number) => {
+    // 🔹 Nueva lógica para aprobación con garante (será implementada luego)
+    console.log("📋 Aprobación con garante solicitada para:", solicitudId);
+    // Placeholder: Se implementará lógica específica para garante
+    // Por ahora, ejecutamos la pre-aprobación estándar
+    await handleDecision(solicitudId, CreditDecision.PRE_APROBAR);
   };
 
   /* =======================
@@ -257,19 +287,14 @@ export default function DashboardCooperative() {
                   {/* Actions */}
                   <div className="lg:w-64 flex flex-col justify-center gap-3">
                     <button
-                      onClick={() =>
-                        handleDecision(
-                          r.solicitudId,
-                          CreditDecision.PRE_APROBAR
-                        )
-                      }
+                      onClick={() => handleOpenPreApprovalModal(r)}
                       disabled={
                         r.estado !== CreditEstado.ENVIADA ||
                         processingId === r.solicitudId
                       }
                       className={`w-full py-3 rounded-xl text-sm font-semibold ${
                         r.estado === CreditEstado.ENVIADA
-                          ? "bg-green-600 text-white"
+                          ? "bg-green-600 text-white hover:bg-green-700 transition"
                           : "bg-gray-200 text-gray-400"
                       }`}
                     >
@@ -291,7 +316,7 @@ export default function DashboardCooperative() {
                       }
                       className={`w-full py-3 rounded-xl text-sm font-semibold ${
                         r.estado === CreditEstado.ENVIADA
-                          ? "bg-red-600 text-white"
+                          ? "bg-red-600 text-white hover:bg-red-700 transition"
                           : "bg-gray-200 text-gray-400"
                       }`}
                     >
@@ -306,6 +331,20 @@ export default function DashboardCooperative() {
           </div>
         )}
       </main>
+
+      {/* Modal de Pre-aprobación */}
+      {selectedRequest && (
+        <PreApprovalModal
+          open={showPreApprovalModal}
+          onClose={handleClosePreApprovalModal}
+          solicitudId={selectedRequest.solicitudId}
+          monto={selectedRequest.montoSolicitado}
+          tipo={selectedRequest.tipo}
+          onApproveWithoutGuarantee={handleApproveWithoutGuarantee}
+          onApproveWithGuarantee={handleApproveWithGuarantee}
+          isLoading={processingId === selectedRequest.solicitudId}
+        />
+      )}
 
       <Footer />
     </div>
