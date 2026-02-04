@@ -5,100 +5,163 @@ import { useAuth } from "../context/AuthContext";
 import Step1Identity from "./steps/Step1Identity";
 import Step2PersonalDetails from "./steps/Step2PersonalDetails";
 import Step3Address from "./steps/Step3Address";
+import Step4Economic from "./steps/Step4Economic";
+import Step5Spouse from "./steps/Step5Spouse";
 import Step4Review from "./steps/Step4Review";
+import SuccessOnboardingModal from "../components/SuccessOnboardingModal";
 
-import { submitOnboarding } from "../api/onboarding.api";
+import {
+  submitOnboarding,
+  type OnboardingPayload,
+  type SolicitanteData,
+} from "../api/onboarding.api";
+
+/* =======================
+   MODELO BASE SOLICITANTE
+======================= */
+const EMPTY_SOLICITANTE: SolicitanteData = {
+  nombres: "",
+  apellidos: "",
+  cedula: "",
+  fechaNacimiento: "",
+  estadoCivil: "",
+  ocupacion: "",
+  empresaTrabajo: "",
+  telefono: "",
+  tieneConyuge: false,
+  direccion: {
+    provincia: "",
+    canton: "",
+    barrio: "",
+    callePrincipal: "",
+    numero: "",
+    referenciaUbicacion: "",
+    tipoVivienda: "PROPIA",
+  },
+  actividadEconomica: {
+    nombreNegocio: "",
+    direccionNegocio: "",
+    tiempoActividad: "",
+    telefonoNegocio: "",
+  },
+  ingresoEgreso: {
+    ingresoMensual: 0,
+    egresoMensual: 0,
+  },
+  referencias: [
+    {
+      nombreCompleto: "",
+      tipo: "PERSONAL",
+      parentesco: "",
+      telefono: "",
+    },
+  ],
+};
 
 export default function OnboardingPage() {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<"success" | "already_completed">("success");
 
+  /* =======================
+     ESTADO CENTRAL
+  ======================= */
   const [formData, setFormData] = useState({
-    identity: {
-      tipoIdentificacion: "",
-      identification: "",
-      first_name1: "",
-      first_name2: "",
-      last_name1: "",
-      last_name2: "",
-      birthdate: "",
-    },
-    details: {
-      gender: "",
-      nationality: "",
-      civilStatus: "",
-      phone: "",
-      email: "",
-    },
-    address: {
-      province: "",
-      city: "",
-      parish: "",
-      address: "",
-      reference: "",
-      housingType: "",
-      residenceTime: "",
-    },
+    destinoCredito: "",
+    solicitante: { ...EMPTY_SOLICITANTE },
+    conyuge: null as SolicitanteData | null,
   });
+
+  const hasSpouse = formData.solicitante.tieneConyuge;
 
   const nextStep = () => setStep((s) => s + 1);
   const prevStep = () => setStep((s) => s - 1);
 
+  const totalSteps = hasSpouse ? 6 : 5;
+  const progress = (step / totalSteps) * 100;
+
+  /* =======================
+     SUBMIT FINAL
+  ======================= */
   const handleSubmit = async () => {
     try {
-      const response = await submitOnboarding({
-        infoPersonal: {
-          tipoIdentificacion: formData.identity.tipoIdentificacion,
-          identificacion: formData.identity.identification,
-          primerNombre: formData.identity.first_name1,
-          segundoNombre: formData.identity.first_name2,
-          primerApellido: formData.identity.last_name1,
-          segundoApellido: formData.identity.last_name2,
-          fechaNacimiento: formData.identity.birthdate,
-          sexo: formData.details.gender,
-          nacionalidad: formData.details.nationality,
-          estadoCivil: formData.details.civilStatus,
-          telefono: formData.details.phone,
-          correo: formData.details.email,
-        },
-        domicilio: {
-          provincia: formData.address.province,
-          ciudad: formData.address.city,
-          parroquia: formData.address.parish,
-          direccion: formData.address.address,
-          referencia: formData.address.reference,
-          tipoVivienda: formData.address.housingType,
-          tiempoResidencia: formData.address.residenceTime,
-        },
-      });
+      setIsLoading(true);
+      setError("");
 
-      if (response?.status === "COMPLETED") {
-        updateUser({ ...user, onboarding: true });
-        navigate("/dashboard-client");
-      } else {
-        throw new Error("Onboarding no completado");
+      const payload: OnboardingPayload = {
+        destinoCredito: formData.destinoCredito || "CREDITO",
+        solicitante: formData.solicitante,
+      };
+
+      if (hasSpouse && formData.conyuge) {
+        payload.conyuge = formData.conyuge;
       }
 
-    } catch (error) {
-      console.error("❌ Error enviando onboarding:", error);
-      alert("Ocurrió un error al guardar la información.");
+      const response = await submitOnboarding(payload);
+
+      if (response?.status === "COMPLETED" || response?.status === "success") {
+        updateUser({ ...user, onboarding: true });
+        // Mostrar modal de éxito
+        setModalType("success");
+        setShowModal(true);
+      } else {
+        throw new Error(response?.message || "Onboarding no completado");
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorStatus = (err as any)?.status;
+
+      console.error("❌ Error enviando onboarding:", err);
+
+      // 🔹 MANEJO DE ERROR DE NEGOCIO: Ya completó onboarding
+      if (
+        errorStatus === 400 &&
+        errorMessage.includes("ya ha completado el formulario de onboarding")
+      ) {
+        console.log(
+          "ℹ️ Usuario ya completó onboarding, mostrando modal..."
+        );
+        // Actualizar el estado del usuario
+        updateUser({ ...user, onboarding: true });
+        // Mostrar modal de ya completado
+        setModalType("already_completed");
+        setShowModal(true);
+        return;
+      }
+
+      // 🔹 OTROS ERRORES: mostrar mensaje de error genérico
+      setError("Ocurrió un error al guardar la información. Intenta de nuevo.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const progress = (step / 4) * 100;
+  const handleModalClose = () => {
+    setShowModal(false);
+    // Redirigir al dashboard después de cerrar el modal
+    setTimeout(() => {
+      navigate("/dashboard-client");
+    }, 300);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 px-4 py-10 flex justify-center">
       <div className="bg-white w-full max-w-3xl p-10 rounded-2xl shadow-xl border border-gray-100">
 
-        {/* Progress Bar */}
+        {/* PROGRESS */}
         <div className="mb-8">
           <div className="flex justify-between text-sm font-medium text-gray-600 mb-2">
             <span>Identidad</span>
             <span>Datos Personales</span>
             <span>Domicilio</span>
+            <span>Economía</span>
+            {hasSpouse && <span>Cónyuge</span>}
             <span>Confirmación</span>
           </div>
 
@@ -115,10 +178,31 @@ export default function OnboardingPage() {
         </h1>
 
         <p className="text-gray-600 mb-8">
-          Este formulario se llena una sola vez. Luego podrás solicitar créditos sin volver a ingresar tus datos.
+          Este formulario se llena una sola vez. Luego podrás solicitar créditos
+          sin volver a ingresar tus datos.
         </p>
 
-        {/* Steps */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center gap-2">
+            <span className="text-xl">✓</span>
+            {successMessage}
+          </div>
+        )}
+
+        {/* Modal de éxito/completado */}
+        <SuccessOnboardingModal
+          open={showModal}
+          onClose={handleModalClose}
+          type={modalType}
+        />
+
+        {/* STEPS */}
         {step === 1 && (
           <Step1Identity
             data={formData}
@@ -146,10 +230,29 @@ export default function OnboardingPage() {
         )}
 
         {step === 4 && (
+          <Step4Economic
+            data={formData}
+            setData={setFormData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+          />
+        )}
+
+        {hasSpouse && step === 5 && (
+          <Step5Spouse
+            data={formData}
+            setData={setFormData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+          />
+        )}
+
+        {step === totalSteps && (
           <Step4Review
             data={formData}
             prevStep={prevStep}
             onSubmit={handleSubmit}
+            isLoading={isLoading}
           />
         )}
       </div>

@@ -1,50 +1,129 @@
 export default function Step1Identity({ data, setData, nextStep }) {
+  const solicitante = data.solicitante;
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     setData((prev) => ({
       ...prev,
-      identity: {
-        ...prev.identity,
-        [e.target.name]: e.target.value,
+      solicitante: {
+        ...prev.solicitante,
+        [name]: value,
       },
     }));
   };
 
-  const identity = data.identity;
+  const handleEstadoCivilChange = (e) => {
+    const estadoCivil = e.target.value;
+    const tieneConyuge = estadoCivil === "CASADO";
+
+    setData((prev) => {
+      const newData = {
+        ...prev,
+        solicitante: {
+          ...prev.solicitante,
+          estadoCivil,
+          tieneConyuge,
+        },
+        conyuge: prev.conyuge,
+      };
+
+      if (tieneConyuge && !prev.conyuge) {
+        newData.conyuge = {
+          nombres: "",
+          apellidos: "",
+          cedula: "",
+          fechaNacimiento: "",
+          estadoCivil: "",
+          ocupacion: "",
+          empresaTrabajo: "",
+          telefono: "",
+          tieneConyuge: false,
+          direccion: {
+            provincia: "",
+            canton: "",
+            barrio: "",
+            callePrincipal: "",
+            numero: "",
+            referenciaUbicacion: "",
+            tipoVivienda: "PROPIA",
+          },
+          actividadEconomica: {
+            nombreNegocio: "",
+            direccionNegocio: "",
+            tiempoActividad: "",
+            telefonoNegocio: "",
+          },
+          ingresoEgreso: {
+            ingresoMensual: 0,
+            egresoMensual: 0,
+          },
+          referencias: [
+            {
+              nombreCompleto: "",
+              tipo: "PERSONAL",
+              parentesco: "",
+              telefono: "",
+            },
+          ],
+        };
+      }
+
+      if (!tieneConyuge) {
+        newData.conyuge = null;
+      }
+
+      return newData;
+    });
+  };
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Identidad del Cliente</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+        Identidad del Cliente
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Input
+          label="Cédula *"
+          name="cedula"
+          value={solicitante.cedula}
+          onChange={handleChange}
+          placeholder="Ej: 1234567890"
+          maxLength={10}
+        />
+
+        <Input
+          label="Nombres *"
+          name="nombres"
+          value={solicitante.nombres}
+          onChange={handleChange}
+          placeholder="Ej: Juan"
+        />
+
+        <Input
+          label="Apellidos *"
+          name="apellidos"
+          value={solicitante.apellidos}
+          onChange={handleChange}
+          placeholder="Ej: García Pérez"
+        />
+
+        <Input
+          label="Fecha de Nacimiento *"
+          type="date"
+          name="fechaNacimiento"
+          value={solicitante.fechaNacimiento}
+          onChange={handleChange}
+        />
 
         <Select
-          label="Tipo de Identificación"
-          name="tipoIdentificacion"
-          value={identity.tipoIdentificacion}
-          onChange={handleChange}
-          options={["CEDULA", "PASAPORTE", "RUC"]}
+          label="Estado Civil *"
+          name="estadoCivil"
+          value={solicitante.estadoCivil}
+          onChange={handleEstadoCivilChange}
+          options={["SOLTERO", "CASADO", "DIVORCIADO", "VIUDO", "UNIÓN LIBRE"]}
         />
-
-        <Input
-          label="Número de Identificación"
-          name="identification"
-          value={identity.identification}
-          onChange={handleChange}
-        />
-
-        <Input label="Primer Nombre" name="first_name1" value={identity.first_name1} onChange={handleChange} />
-        <Input label="Segundo Nombre" name="first_name2" value={identity.first_name2} onChange={handleChange} />
-        <Input label="Primer Apellido" name="last_name1" value={identity.last_name1} onChange={handleChange} />
-        <Input label="Segundo Apellido" name="last_name2" value={identity.last_name2} onChange={handleChange} />
-
-        <Input
-          label="Fecha de Nacimiento"
-          type="date"
-          name="birthdate"
-          value={identity.birthdate}
-          onChange={handleChange}
-        />
-
       </div>
 
       <button
@@ -57,6 +136,10 @@ export default function Step1Identity({ data, setData, nextStep }) {
   );
 }
 
+/* ======================
+   COMPONENTES UI
+====================== */
+
 function Input({ label, value, ...props }) {
   return (
     <div>
@@ -64,8 +147,7 @@ function Input({ label, value, ...props }) {
       <input
         {...props}
         value={value}
-        className="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2
-        focus:ring-primary-600 transition outline-none"
+        className="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-primary-600 transition outline-none"
       />
     </div>
   );
@@ -78,12 +160,13 @@ function Select({ label, value, options, ...props }) {
       <select
         {...props}
         value={value}
-        className="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2
-        focus:ring-primary-600 transition outline-none"
+        className="w-full px-4 py-3 border rounded-xl bg-gray-50 focus:ring-2 focus:ring-primary-600 transition outline-none"
       >
         <option value="">Seleccione...</option>
         {options.map((op) => (
-          <option key={op} value={op}>{op}</option>
+          <option key={op} value={op}>
+            {op}
+          </option>
         ))}
       </select>
     </div>

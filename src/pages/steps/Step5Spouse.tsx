@@ -1,34 +1,70 @@
-export default function Step2PersonalDetails({
-  data,
-  setData,
-  nextStep,
-  prevStep,
-}) {
-  const solicitante = data.solicitante;
+export default function Step5Spouse({ data, setData, nextStep, prevStep }) {
+  const conyuge = data.conyuge;
+
+  if (!conyuge) {
+    return null;
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setData((prev) => ({
-      ...prev,
-      solicitante: {
-        ...prev.solicitante,
-        [name]: value,
-      },
-    }));
+    setData((prev) => {
+      if (!prev.conyuge) return prev;
+
+      return {
+        ...prev,
+        conyuge: {
+          ...prev.conyuge,
+          [name]: value,
+        },
+      };
+    });
   };
 
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-        Datos Personales
+        Información del Cónyuge
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Input
+          label="Cédula del Cónyuge *"
+          name="cedula"
+          value={conyuge.cedula}
+          onChange={handleChange}
+          placeholder="Ej: 1234567890"
+          maxLength={10}
+        />
+
+        <Input
+          label="Nombres *"
+          name="nombres"
+          value={conyuge.nombres}
+          onChange={handleChange}
+          placeholder="Ej: María"
+        />
+
+        <Input
+          label="Apellidos *"
+          name="apellidos"
+          value={conyuge.apellidos}
+          onChange={handleChange}
+          placeholder="Ej: García Pérez"
+        />
+
+        <Input
+          label="Fecha de Nacimiento *"
+          type="date"
+          name="fechaNacimiento"
+          value={conyuge.fechaNacimiento}
+          onChange={handleChange}
+        />
+
+        <Input
           label="Teléfono *"
           name="telefono"
-          value={solicitante.telefono}
+          value={conyuge.telefono}
           onChange={handleChange}
           placeholder="Ej: 0987654321"
           maxLength={10}
@@ -37,15 +73,15 @@ export default function Step2PersonalDetails({
         <Input
           label="Ocupación *"
           name="ocupacion"
-          value={solicitante.ocupacion}
+          value={conyuge.ocupacion}
           onChange={handleChange}
-          placeholder="Ej: Ingeniero de Sistemas"
+          placeholder="Ej: Ingeniera"
         />
 
         <Input
           label="Empresa o Negocio *"
           name="empresaTrabajo"
-          value={solicitante.empresaTrabajo}
+          value={conyuge.empresaTrabajo}
           onChange={handleChange}
           placeholder="Ej: Empresa XYZ"
         />

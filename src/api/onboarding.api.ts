@@ -2,17 +2,72 @@ import { httpClient } from "./httpClient";
 
 const BASE_URL = import.meta.env.VITE_API_ONBOARDING;
 
+export interface DireccionData {
+  provincia: string;
+  canton: string;
+  barrio: string;
+  callePrincipal: string;
+  numero: string;
+  referenciaUbicacion: string;
+  tipoVivienda: "PROPIA" | "ALQUILADA" | "FAMILIAR";
+}
+
+export interface ActividadEconomicaData {
+  nombreNegocio: string;
+  direccionNegocio: string;
+  tiempoActividad: string;
+  telefonoNegocio: string;
+}
+
+export interface IngresoEgresoData {
+  ingresoMensual: number;
+  egresoMensual: number;
+}
+
+export interface ReferenciaData {
+  nombreCompleto: string;
+  tipo: "PERSONAL" | "LABORAL" | "COMERCIAL";
+  parentesco: string;
+  telefono: string;
+}
+
+export interface SolicitanteData {
+  nombres: string;
+  apellidos: string;
+  cedula: string;
+  fechaNacimiento: string;
+  estadoCivil: string;
+  ocupacion: string;
+  empresaTrabajo: string;
+  telefono: string;
+  email: string;
+  tieneConyuge: boolean;
+  direccion: DireccionData;
+  actividadEconomica: ActividadEconomicaData;
+  ingresoEgreso: IngresoEgresoData;
+  referencias: ReferenciaData[];
+}
+
+export interface OnboardingPayload {
+  destinoCredito: string;
+  solicitante: SolicitanteData;
+  conyuge?: SolicitanteData;
+}
+
 export interface OnboardingSubmitResponse {
-  status: "COMPLETED";
+  status: string;
   message: string;
+  id?: string;
 }
 
 export async function submitOnboarding(
-  payload: any
+  payload: OnboardingPayload,
 ): Promise<OnboardingSubmitResponse> {
-  return httpClient(`${BASE_URL}/submit`, {
+  return httpClient(`/api/onboarding/cliente/solicitante`, {
+    baseUrl: BASE_URL,
     method: "POST",
-    body: JSON.stringify(payload),
+    body: payload,
+    auth: true,
   });
 }
 
@@ -28,7 +83,6 @@ export function getOnboardingStatus(): Promise<OnboardingStatusResponse | null> 
     method: "GET",
     auth: true,
   }).catch((error) => {
-    // En caso de error (incluyendo 500), loguear y retornar null
     console.error("Error fetching onboarding status:", error);
     return null;
   });
