@@ -39,7 +39,7 @@ export const getMyCooperativeRequests = async (): Promise<
     {
       baseUrl: import.meta.env.VITE_API_CREDIT_REQUESTS,
       auth: true,
-    }
+    },
   );
 
   return data ?? [];
@@ -51,7 +51,7 @@ export const getMyCooperativeRequests = async (): Promise<
  */
 export const decideCreditRequest = async (
   solicitudId: number,
-  decision: CreditDecision
+  decision: CreditDecision,
 ): Promise<void> => {
   await httpClient<void>(`/cooperative/me/requests/${solicitudId}/decision`, {
     method: "PUT",
@@ -66,17 +66,34 @@ export const decideCreditRequest = async (
  * GET /api/credits/me/{solicitudId}/pre-approved
  */
 export const getCreditRequestCooperatives = async (
-  solicitudId: number
+  solicitudId: number,
 ): Promise<CreditRequestCooperative[]> => {
   const data = await httpClient<CreditRequestCooperative[]>(
     `/me/${solicitudId}/pre-approved`,
     {
       baseUrl: import.meta.env.VITE_API_CREDIT_REQUESTS,
       auth: true,
-    }
+    },
   );
 
   return data ?? [];
+};
+
+/**
+ * COOPERATIVA
+ * PUT /api/credits/cooperative/me/requests/{solicitudId}/solicitar-garante
+ */
+export const requestGuaranteeForCreditRequest = async (
+  solicitudId: number,
+): Promise<void> => {
+  await httpClient<void>(
+    `/cooperative/me/requests/${solicitudId}/solicitar-garante`,
+    {
+      method: "PUT",
+      baseUrl: import.meta.env.VITE_API_CREDIT_REQUESTS,
+      auth: true,
+    },
+  );
 };
 
 /**
@@ -85,7 +102,7 @@ export const getCreditRequestCooperatives = async (
  */
 export const acceptCreditCooperative = async (
   solicitudId: number,
-  cooperativaId: number
+  cooperativaId: number,
 ): Promise<void> => {
   await httpClient<void>(
     `/me/${solicitudId}/cooperatives/${cooperativaId}/accept`,
@@ -93,6 +110,6 @@ export const acceptCreditCooperative = async (
       method: "PUT",
       baseUrl: import.meta.env.VITE_API_CREDIT_REQUESTS,
       auth: true,
-    }
+    },
   );
 };

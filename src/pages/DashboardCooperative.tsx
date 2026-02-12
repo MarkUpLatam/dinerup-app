@@ -15,6 +15,7 @@ import PreApprovalModal from "../components/PreApprovalModal";
 import {
   getMyCooperativeRequests,
   decideCreditRequest,
+  requestGuaranteeForCreditRequest,
 } from "../api/creditRequests.api";
 
 import type { CooperativeCreditRequest } from "../types/credit";
@@ -109,11 +110,18 @@ export default function DashboardCooperative() {
   };
 
   const handleApproveWithGuarantee = async (solicitudId: number) => {
-    // 🔹 Nueva lógica para aprobación con garante (será implementada luego)
-    console.log("📋 Aprobación con garante solicitada para:", solicitudId);
-    // Placeholder: Se implementará lógica específica para garante
-    // Por ahora, ejecutamos la pre-aprobación estándar
-    await handleDecision(solicitudId, CreditDecision.PRE_APROBAR);
+    try {
+      setProcessingId(solicitudId);
+      // Solicitar garante (cambiar estado a SOLICITANDO_GARANTE)
+      await requestGuaranteeForCreditRequest(solicitudId);
+      // Recargar solicitudes desde el backend
+      await loadRequests();
+    } catch (error) {
+      console.error("Error al solicitar garante:", error);
+      alert("No se pudo registrar la solicitud de garante");
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   /* =======================
@@ -222,7 +230,7 @@ export default function DashboardCooperative() {
 
                       <span
                         className={`px-4 py-1.5 rounded-full text-xs font-semibold ${
-                          r.estado === CreditEstado.ENVIADA
+                          r.estado === CreditEstado.ENVIADA || r.estado === CreditEstado.SOLICITANDO_GARANTE
                             ? "bg-yellow-100 text-yellow-700"
                             : r.estado === CreditEstado.PRE_APROBADA
                             ? "bg-green-100 text-green-700"
