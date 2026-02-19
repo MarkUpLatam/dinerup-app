@@ -91,7 +91,7 @@ export default function Login() {
   const handleWelcomeContinue = () => {
     localStorage.setItem("welcome_popup_seen", "true");
     setShowWelcomePopup(false);
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   };
 
   return (
