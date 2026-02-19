@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
 import { Shield, CheckCircle, Lock, FileText } from "lucide-react";
 
-const WelcomePopup: React.FC = () => {
-  const navigate = useNavigate();
-  const [showPopup, setShowPopup] = useState(true);
+type WelcomePopupProps = {
+  onContinue: () => void;
+};
+
+const WelcomePopup: React.FC<WelcomePopupProps> = ({ onContinue }) => {
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -15,19 +16,13 @@ const WelcomePopup: React.FC = () => {
   }, []);
 
   const handleClose = () => {
-    setShowPopup(false);
     document.body.style.overflow = "auto";
-    // Redirigir al login después de 300ms (duración de la animación de cierre)
-    setTimeout(() => {
-      navigate("/login");
-    }, 300);
+    onContinue();
   };
 
-  if (!showPopup) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full relative overflow-hidden animate-scale-in max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[9999] p-4 animate-fade-in">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full relative overflow-hidden animate-scale-in max-h-[90vh] flex flex-col border-2 border-white/20">
         {/* Elementos decorativos de fondo */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-brand-secondary/20 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-brand-secondary/20 to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>

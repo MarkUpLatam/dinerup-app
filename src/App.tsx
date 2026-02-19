@@ -6,12 +6,11 @@ import OnboardingPage from "./pages/OnboardingPage";
 import ActivateAccount from "./pages/ActivateAccount";
 import ForgotPassword from "./pages/password/ForgotPassword";
 import ResetPassword from "./pages/password/ResetPassword";
-import WelcomePopup from "./components/WelcomePopup";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<WelcomePopup />} />
+      <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/activate" element={<ActivateAccount />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

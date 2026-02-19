@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import LogoDinerUp from "../images/LogoDinerUp.png";
 import CompleteRegistrationModal from "../components/auth/CompleteRegistrationModal";
 import PublicCreditRequestModal from "../components/PublicCreditRequestModal";
+import WelcomePopup from "../components/WelcomePopup";
 
 // Schema de validación
 const loginSchema = z.object({
@@ -24,6 +25,7 @@ export default function Login() {
   const [showCompleteRegistration, setShowCompleteRegistration] =
     useState(false);
   const [showCreditRequestModal, setShowCreditRequestModal] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [creditRequestType, setCreditRequestType] = useState<
     "CREDITO" | "INVERSION"
   >("CREDITO");
@@ -38,6 +40,12 @@ export default function Login() {
       setShowCompleteRegistration(true);
       localStorage.removeItem("just_activated");
     }
+  }, []);
+
+  useEffect(() => {
+    const hasSeenWelcomePopup =
+      localStorage.getItem("welcome_popup_seen") === "true";
+    setShowWelcomePopup(!hasSeenWelcomePopup);
   }, []);
 
   const loginForm = useForm<LoginFormData>({
@@ -78,6 +86,12 @@ export default function Login() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleWelcomeContinue = () => {
+    localStorage.setItem("welcome_popup_seen", "true");
+    setShowWelcomePopup(false);
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -243,6 +257,8 @@ export default function Login() {
         onClose={() => setShowCreditRequestModal(false)}
         type={creditRequestType}
       />
+
+      {showWelcomePopup && <WelcomePopup onContinue={handleWelcomeContinue} />}
     </div>
   );
 }
