@@ -87,3 +87,25 @@ export function getOnboardingStatus(): Promise<OnboardingStatusResponse | null> 
     return null;
   });
 }
+
+// Garante onboarding
+export interface GuaranteeOnboardingResponse {
+  id: number;
+  estado: string;
+  destinoCredito: string;
+  fechaCreacion: string;
+}
+
+export async function submitGuaranteeOnboarding(
+  payload: OnboardingPayload,
+): Promise<GuaranteeOnboardingResponse> {
+  return httpClient<GuaranteeOnboardingResponse>(
+    `/api/onboarding/cliente/garante/completar`,
+    {
+      baseUrl: BASE_URL,
+      method: "POST",
+      body: payload,
+      auth: true,
+    },
+  );
+}

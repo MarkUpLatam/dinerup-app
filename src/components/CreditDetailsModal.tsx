@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { X, Calendar, DollarSign, TrendingUp, Building2, Loader, CheckCircle } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { X, DollarSign, TrendingUp, Building2, Loader, CheckCircle } from "lucide-react";
 import type { CreditRequest, CreditRequestCooperative } from "../types/credit";
 import { CreditEstado } from "../types/creditEstado";
 import { getCreditRequestCooperatives, acceptCreditCooperative } from "../api/creditRequests.api";
+import GuaranteeOnboardingModal from "./GuaranteeOnboardingModal";
 
 interface CreditDetailsModalProps {
   open: boolean;
@@ -28,10 +29,10 @@ const statusMap: Record<
     color: "text-green-700",
     bgColor: "bg-green-100",
   },
-  [CreditEstado.APROBADA]: {
-    label: "Aprobada",
-    color: "text-green-700",
-    bgColor: "bg-green-100",
+  [CreditEstado.SOLICITANDO_GARANTE]: {
+    label: "Solicitando garante",
+    color: "text-amber-700",
+    bgColor: "bg-amber-100",
   },
   [CreditEstado.RECHAZADA]: {
     label: "Rechazada",
@@ -47,14 +48,9 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
   const [selectedCooperativeId, setSelectedCooperativeId] = useState<number | null>(null);
   const [isAccepting, setIsAccepting] = useState(false);
   const [acceptError, setAcceptError] = useState<string | null>(null);
+  const [showGuaranteeModal, setShowGuaranteeModal] = useState(false);
 
-  useEffect(() => {
-    if (open && request) {
-      loadCooperatives();
-    }
-  }, [open, request]);
-
-  const loadCooperatives = async () => {
+  const loadCooperatives = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -66,7 +62,13 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [request.solicitudId]);
+
+  useEffect(() => {
+    if (open && request) {
+      loadCooperatives();
+    }
+  }, [open, request, loadCooperatives]);
 
   const handleAcceptCooperative = async (cooperativaId: number) => {
     setIsAccepting(true);
@@ -86,7 +88,7 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
           errorMessage = err.message;
         }
         // Mapear errores específicos por status HTTP
-        const status = (err as any).status;
+        const status = (err as unknown as Record<string, unknown>).status;
         if (status === 409) {
           // El error 409 ya debería tener el mensaje del servidor
           errorMessage = err.message || "Esta solicitud ya fue aceptada previamente en una entidad financiera";
@@ -116,14 +118,6 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
           maximumFractionDigits: 2,
         })}`
       : "—";
-
-  const fechaSegura = request.fechaSolicitud
-    ? new Date(request.fechaSolicitud).toLocaleDateString("es-EC", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "—";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -268,31 +262,38 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
                               className={`px-3 py-1 rounded-lg font-semibold text-xs whitespace-nowrap ${
                                 coop.estado === "PRE_APROBADA"
                                   ? "bg-green-100 text-green-700"
-                                  : coop.estado === "APROBADA"
-                                  ? "bg-green-100 text-green-700"
                                   : "bg-amber-100 text-amber-700"
                               }`}
                             >
                               {coop.estado === "PRE_APROBADA"
                                 ? "Pre aprobada"
-                                : coop.estado === "APROBADA"
-                                ? "Aprobada"
                                 : coop.estado}
                             </span>
-                            <button
-                              onClick={() => handleAcceptCooperative(coop.cooperativaId)}
-                              disabled={(hasSelection && !isSelected) || isAccepting}
-                              className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-1 ${
-                                isSelected
-                                  ? "bg-green-600 text-white cursor-default"
-                                  : hasSelection
-                                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                  : "bg-primary-600 text-white hover:bg-primary-700 cursor-pointer"
-                              } ${isAccepting ? "opacity-75" : ""}`}
-                            >
-                              {isAccepting && <Loader className="w-3 h-3 animate-spin" />}
-                              {isSelected ? "✓ Aceptada" : isAccepting ? "Aceptando..." : "Aceptar"}
-                            </button>
+                            {coop.estado === "SOLICITANDO_GARANTE" ? (
+                              <button
+                                onClick={() => {
+                                  setShowGuaranteeModal(true);
+                                }}
+                                className="px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-1 bg-amber-600 text-white cursor-pointer hover:bg-amber-700"
+                              >
+                                Completar información del garante
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleAcceptCooperative(coop.cooperativaId)}
+                                disabled={(hasSelection && !isSelected) || isAccepting}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all flex items-center gap-1 ${
+                                  isSelected
+                                    ? "bg-green-600 text-white cursor-default"
+                                    : hasSelection
+                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                    : "bg-primary-600 text-white hover:bg-primary-700 cursor-pointer"
+                                } ${isAccepting ? "opacity-75" : ""}`}
+                              >
+                                {isAccepting && <Loader className="w-3 h-3 animate-spin" />}
+                                {isSelected ? "✓ Aceptada" : isAccepting ? "Aceptando..." : "Aceptar"}
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -365,6 +366,18 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
           </button>
         </div>
       </div>
+
+      {/* Modal de onboarding para garante */}
+      <GuaranteeOnboardingModal
+        open={showGuaranteeModal}
+        onClose={() => {
+          setShowGuaranteeModal(false);
+        }}
+        onSuccess={() => {
+          // Recargar datos después de completar el onboarding del garante
+          loadCooperatives();
+        }}
+      />
     </div>
   );
 }

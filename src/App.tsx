@@ -4,22 +4,21 @@ import DashboardClient from "./pages/DashboardClient";
 import DashboardCooperative from "./pages/DashboardCooperative";
 import OnboardingPage from "./pages/OnboardingPage";
 import ActivateAccount from "./pages/ActivateAccount";
-import ForgotPassword from "./pages/password/ForgotPassword"
+import ForgotPassword from "./pages/password/ForgotPassword";
 import ResetPassword from "./pages/password/ResetPassword";
-
-
+import WelcomePopup from "./components/WelcomePopup";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/activate" element={<ActivateAccount />} /> 
+      <Route path="/" element={<WelcomePopup />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/activate" element={<ActivateAccount />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/dashboard-client" element={<DashboardClient />} />
       <Route path="/dashboard-cooperative" element={<DashboardCooperative />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
-
     </Routes>
   );
 }
