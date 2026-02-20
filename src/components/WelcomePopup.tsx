@@ -6,7 +6,6 @@ type WelcomePopupProps = {
 };
 
 const WelcomePopup: React.FC<WelcomePopupProps> = ({ onContinue }) => {
-
   useEffect(() => {
     document.body.style.overflow = "hidden";
 

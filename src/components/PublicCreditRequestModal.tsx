@@ -1,13 +1,5 @@
 import { useState, useMemo } from "react";
-import {
-  X,
-  AlertCircle,
-  Loader,
-  CheckCircle2,
-  User,
-  MapPin,
-  Wallet,
-} from "lucide-react";
+import { X, Loader, User, MapPin, Wallet } from "lucide-react";
 import { httpClient } from "../api/httpClient";
 import SuccessRequestModal from "./SuccessRequestModal";
 import { ecuadorProvinces } from "../data/ecuadorProvinces";
@@ -26,8 +18,8 @@ interface FormData {
   identification: string;
   province: string;
   city: string;
-  amount: number;
-  plazoMeses: number;
+  amount: string;
+  plazoMeses: string;
   type: "CREDITO" | "INVERSION";
   creditType: string;
 }
@@ -41,28 +33,114 @@ const creditTypes = [
   { id: "CONSUMO", label: "Consumo" },
 ];
 
+/* ================= VALIDADORES ================= */
+const onlyLetters = (value: string) =>
+  value.replace(/[^a-zA-ZÁÉÍÓÚáéíóúÑñ\s]/g, "");
+
+const onlyNumbers = (value: string, maxLength?: number) => {
+  const cleaned = value.replace(/\D/g, "");
+  return maxLength ? cleaned.slice(0, maxLength) : cleaned;
+};
+
+const isValidEcuadorId = (cedula: string): boolean => {
+  if (!/^\d{10}$/.test(cedula)) return false;
+
+  const digits = cedula.split("").map(Number);
+  const province = parseInt(cedula.substring(0, 2));
+  if (province < 1 || province > 24) return false;
+
+  const checkDigit = digits.pop()!;
+  const sum = digits.reduce((acc, digit, index) => {
+    if (index % 2 === 0) {
+      const doubled = digit * 2;
+      return acc + (doubled > 9 ? doubled - 9 : doubled);
+    }
+    return acc + digit;
+  }, 0);
+
+  const calculated = (10 - (sum % 10)) % 10;
+  return calculated === checkDigit;
+};
+
+/* ================= COMPONENTES AUX ================= */
+
+interface InputProps {
+  name: string;
+  placeholder: string;
+  value: string | number;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => void;
+  error?: string;
+}
+
+export type { InputProps };
+
+function Input({ name, placeholder, value, onChange, error }: InputProps) {
+  return (
+    <div className="space-y-2">
+      <input
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition
+          ${error ? "border-red-400 focus:ring-red-500" : "border-gray-300 focus:ring-brand-secondary"}`}
+      />
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+interface SectionCardProps {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}
+
+function SectionCard({ title, icon, children }: SectionCardProps) {
+  return (
+    <div className="bg-gray-50 p-6 rounded-xl shadow-md">
+      <div className="flex items-center gap-3 mb-4">
+        {icon}
+        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+      </div>
+      {children}
+    </div>
+  );
+}
+/* ================= COMPONENTE Para que se reinicien los campos ================= */
+
+const getInitialFormState = (type: "CREDITO" | "INVERSION"): FormData => ({
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  identification: "",
+  province: "",
+  city: "",
+  amount: "",
+  plazoMeses: "12",
+  type,
+  creditType: "MICROCREDITO",
+});
+
+/* ================= COMPONENTE PRINCIPAL ================= */
+
 export default function PublicCreditRequestModal({
   open,
   onClose,
   type,
 }: PublicCreditRequestModalProps) {
-  const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    identification: "",
-    province: "",
-    city: "",
-    amount: 0,
-    plazoMeses: 12,
-    type: type,
-    creditType: "MICROCREDITO",
-  });
+  const [formData, setFormData] = useState<FormData>(getInitialFormState(type));
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const resetForm = () => {
+    setFormData(getInitialFormState(type));
+    setErrors({});
+  };
 
   const availableCities = useMemo(() => {
     const provinceData = ecuadorProvinces.Ecuador.find(
@@ -76,15 +154,26 @@ export default function PublicCreditRequestModal({
 
     if (!formData.firstName) newErrors.firstName = "Requerido";
     if (!formData.lastName) newErrors.lastName = "Requerido";
-    if (!formData.email) newErrors.email = "Correo inválido";
+    if (!/^\S+@\S+\.\S+$/.test(formData.email))
+      newErrors.email = "Correo inválido";
     if (!formData.phone || formData.phone.length !== 10)
       newErrors.phone = "10 dígitos";
-    if (!formData.identification || formData.identification.length !== 10)
+    if (!isValidEcuadorId(formData.identification))
       newErrors.identification = "Cédula inválida";
     if (!formData.province) newErrors.province = "Requerido";
     if (!formData.city) newErrors.city = "Requerido";
-    if (formData.amount <= 0) newErrors.amount = "Monto inválido";
-    if (formData.plazoMeses <= 0) newErrors.plazoMeses = "Plazo inválido";
+    if (
+      !formData.amount ||
+      Number(formData.amount) <= 0 ||
+      formData.amount.length > 6
+    )
+      newErrors.amount = "Máximo 6 dígitos";
+    if (
+      !formData.plazoMeses ||
+      Number(formData.plazoMeses) <= 0 ||
+      Number(formData.plazoMeses) > 60
+    )
+      newErrors.plazoMeses = "Máximo 60 meses";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -96,18 +185,41 @@ export default function PublicCreditRequestModal({
     const { name, value } = e.target;
     let finalValue = value;
 
-    if (["phone", "identification", "amount", "plazoMeses"].includes(name))
-      finalValue = value.replace(/\D/g, "");
+    switch (name) {
+      case "firstName":
+      case "lastName":
+        finalValue = onlyLetters(value);
+        break;
+
+      case "phone":
+        finalValue = onlyNumbers(value, 10);
+        break;
+
+      case "identification":
+        finalValue = onlyNumbers(value, 10);
+        break;
+
+      case "amount":
+        finalValue = onlyNumbers(value, 6);
+        break;
+
+      case "plazoMeses":
+        finalValue = onlyNumbers(value, 2);
+        if (Number(finalValue) > 60) finalValue = "60";
+        break;
+
+      default:
+        break;
+    }
 
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        ["amount", "plazoMeses"].includes(name) && finalValue
-          ? parseInt(finalValue)
-          : finalValue,
+      [name]: finalValue,
     }));
 
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -120,11 +232,13 @@ export default function PublicCreditRequestModal({
       await httpClient("/public-request", {
         baseUrl: import.meta.env.VITE_API_CREDIT_REQUESTS,
         method: "POST",
-        body: {
+        body: JSON.stringify({
           ...formData,
+          amount: Number(formData.amount),
+          plazoMeses: Number(formData.plazoMeses),
           type,
           creditType: type === "CREDITO" ? formData.creditType : "INVERSION",
-        },
+        }),
         auth: false,
       });
 
@@ -140,48 +254,6 @@ export default function PublicCreditRequestModal({
 
   if (!open) return null;
 
-  const SectionCard = ({
-    title,
-    icon,
-    children,
-  }: {
-    title: string;
-    icon: React.ReactNode;
-    children: React.ReactNode;
-  }) => (
-    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-6 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="bg-brand-secondary/10 p-2 rounded-lg">{icon}</div>
-        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-      </div>
-      {children}
-    </div>
-  );
-
-  const Input = ({ name, placeholder, value, type = "text" }: any) => (
-    <div className="relative">
-      <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={handleChange}
-        className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition
-        ${
-          errors[name]
-            ? "border-red-400 focus:ring-red-500"
-            : "border-gray-300 focus:ring-brand-secondary"
-        }`}
-      />
-      {!errors[name] && value && (
-        <CheckCircle2 className="absolute right-3 top-3.5 w-4 h-4 text-green-500" />
-      )}
-      {errors[name] && (
-        <p className="text-xs text-red-600 mt-1">{errors[name]}</p>
-      )}
-    </div>
-  );
-
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden">
@@ -195,7 +267,12 @@ export default function PublicCreditRequestModal({
               Completa la información y te conectaremos con cooperativas.
             </p>
           </div>
-          <button onClick={onClose}>
+          <button
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
+          >
             <X className="w-6 h-6 text-white" />
           </button>
         </div>
@@ -203,36 +280,53 @@ export default function PublicCreditRequestModal({
         <div className="p-8 space-y-8 max-h-[75vh] overflow-y-auto">
           <SectionCard
             title="Información personal"
-            icon={<User className="w-5 h-5 text-brand-secondary" />}
+            icon={<User className="w-5 h-6 text-brand-secondary" />}
           >
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-6">
+              {/* Nombres y Apellidos */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Input
+                  name="firstName"
+                  placeholder="Nombres"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  error={errors.firstName}
+                />
+                <Input
+                  name="lastName"
+                  placeholder="Apellidos"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  error={errors.lastName}
+                />
+              </div>
+
+              {/* Email */}
               <Input
-                name="firstName"
-                placeholder="Nombres "
-                value={formData.firstName}
+                name="email"
+                placeholder="Correo electrónico"
+                value={formData.email}
+                onChange={handleChange}
+                error={errors.email}
               />
-              <Input
-                name="lastName"
-                placeholder="Apellidos"
-                value={formData.lastName}
-              />
-            </div>
-            <Input
-              name="email"
-              placeholder="Correo electrónico"
-              value={formData.email}
-            />
-            <div className="grid md:grid-cols-2 gap-4">
-              <Input
-                name="phone"
-                placeholder="Teléfono"
-                value={formData.phone}
-              />
-              <Input
-                name="identification"
-                placeholder="Cédula"
-                value={formData.identification}
-              />
+
+              {/* Teléfono y Cédula */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Input
+                  name="phone"
+                  placeholder="Teléfono"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  error={errors.phone}
+                />
+                <Input
+                  name="identification"
+                  placeholder="Cédula"
+                  value={formData.identification}
+                  onChange={handleChange}
+                  error={errors.identification}
+                />
+              </div>
             </div>
           </SectionCard>
 
@@ -409,7 +503,10 @@ export default function PublicCreditRequestModal({
 
           <div className="flex gap-4 pt-6 border-t">
             <button
-              onClick={onClose}
+              onClick={() => {
+                resetForm();
+                onClose();
+              }}
               className="flex-1 border border-gray-300 rounded-xl py-3 font-medium"
             >
               Cancelar

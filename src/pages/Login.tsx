@@ -25,7 +25,7 @@ export default function Login() {
   const [showCompleteRegistration, setShowCompleteRegistration] =
     useState(false);
   const [showCreditRequestModal, setShowCreditRequestModal] = useState(false);
-  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(true);
   const [creditRequestType, setCreditRequestType] = useState<
     "CREDITO" | "INVERSION"
   >("CREDITO");
@@ -40,12 +40,6 @@ export default function Login() {
       setShowCompleteRegistration(true);
       localStorage.removeItem("just_activated");
     }
-  }, []);
-
-  useEffect(() => {
-    const hasSeenWelcomePopup =
-      localStorage.getItem("welcome_popup_seen") === "true";
-    setShowWelcomePopup(!hasSeenWelcomePopup);
   }, []);
 
   const loginForm = useForm<LoginFormData>({
@@ -89,9 +83,7 @@ export default function Login() {
   };
 
   const handleWelcomeContinue = () => {
-    localStorage.setItem("welcome_popup_seen", "true");
     setShowWelcomePopup(false);
-    navigate("/", { replace: true });
   };
 
   return (
