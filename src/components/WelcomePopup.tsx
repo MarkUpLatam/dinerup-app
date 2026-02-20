@@ -28,7 +28,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onContinue }) => {
 
         {/* Contenido scrolleable */}
         <div className="relative z-10 p-8 overflow-y-auto custom-scrollbar">
-          {/* Alert banner */}
+          {/* Alert banners*/}
           <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl flex items-center justify-center text-center">
             <div className="flex-1">
               <h3 className="font-bold text-blue-900 mb-1">
