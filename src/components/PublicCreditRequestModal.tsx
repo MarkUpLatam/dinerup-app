@@ -365,7 +365,7 @@ export default function PublicCreditRequestModal({
                 )}
               </div>
 
-              {/* PARROQUIA */}
+              {/* PARROQUIAS */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   Parroquia
