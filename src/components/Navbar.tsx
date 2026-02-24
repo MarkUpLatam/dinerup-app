@@ -1,7 +1,7 @@
-import { Building2, LogOut, User } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import logo from '../images/LogoDinerUp.png';
+import { Building2, LogOut, User } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import logo from "../images/LogoDinerop.png";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -9,7 +9,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   if (!user) return null;
@@ -20,12 +20,12 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20  rounded-2xl mb-4  overflow-hidden">
-                <img 
-                  src={logo} 
-                  alt="DinerUp Logo" 
-                  className="w-10 h-10 object-contain"
-                />
-              </div>
+              <img
+                src={logo}
+                alt="DinerUp Logo"
+                className="w-10 h-10 object-contain"
+              />
+            </div>
             <div>
               <h1 className="text-xl font-bold text-gray-800">DinerUp</h1>
               <p className="text-xs text-gray-500">by MarkUp</p>
@@ -33,7 +33,6 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
-
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"

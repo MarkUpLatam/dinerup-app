@@ -5,10 +5,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Building2, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import LogoDinerUp from "../images/LogoDinerUp.png";
 import CompleteRegistrationModal from "../components/auth/CompleteRegistrationModal";
 import PublicCreditRequestModal from "../components/PublicCreditRequestModal";
 import WelcomePopup from "../components/WelcomePopup";
+import CooperativesCarousel from "../components/CooperativesCarousel";
+import PlatformVisitsCounter from "../components/PlatformVisitsCounter";
+import LogoDinerop from "../images/LogoDinerop.png";
 
 // Schema de validación
 const loginSchema = z.object({
@@ -33,7 +35,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
 
-  // 🔹 Mostrar modal solo como sugerencia tras activación
+  // Mostrar modal solo como sugerencia tras activación
   useEffect(() => {
     const justActivated = localStorage.getItem("just_activated") === "true";
     if (justActivated) {
@@ -88,38 +90,133 @@ export default function Login() {
 
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">
-      {/* Columna izquierda - Información DinerUp */}
-      <div className="hidden lg:flex lg:w-3/5 bg-gradient-to-br from-brand-secondary via-brand-secondary to-brand-dark p-12 items-center justify-center relative overflow-hidden">
-        {/* Fondo decorativo */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-white rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-white rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3"></div>
-        </div>
+      {/* Columna izquierda - Información Dinerop */}
+      <div
+        className="hidden lg:flex lg:w-3/5 items-center justify-center relative overflow-hidden"
+        style={{
+          padding: "48px",
+          background:
+            "linear-gradient(145deg, #312e81 0%, #3730a3 40%, #1e1b4b 100%)",
+        }}
+      >
+        {/* Anillos giratorios decorativos */}
+        <div
+          style={{
+            position: "absolute",
+            top: -100,
+            right: -100,
+            width: 420,
+            height: 420,
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.08)",
+            animation: "spin-ring 55s linear infinite",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: -60,
+            right: -60,
+            width: 280,
+            height: 280,
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.06)",
+            animation: "spin-ring-rev 35s linear infinite",
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: -80,
+            left: -80,
+            width: 360,
+            height: 360,
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.07)",
+            animation: "spin-ring 45s linear infinite",
+            pointerEvents: "none",
+          }}
+        />
 
-        <div className="relative z-10 max-w-md w-full text-center lg:text-left">
-          {/* Logo y título */}
-          <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl mb-6 shadow-2xl overflow-hidden">
-              <img
-                src={LogoDinerUp}
-                alt="DinerUp Logo"
-                className="w-10 h-10 object-contain"
-              />
-            </div>
-            <h2 className="text-5xl font-bold text-white mb-4 leading-tight">
-              Bienvenido a Dinerop
+        {/* Puntos decorativos */}
+        {[
+          { top: "18%", left: "10%" },
+          { top: "35%", right: "14%" },
+          { top: "65%", left: "6%" },
+          { top: "80%", right: "20%" },
+          { top: "50%", left: "48%" },
+        ].map((pos, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              width: 5,
+              height: 5,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.3)",
+              pointerEvents: "none",
+              ...pos,
+            }}
+          />
+        ))}
+
+        {/* ── Contenido principal ── */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            maxWidth: 460,
+            width: "100%",
+          }}
+        >
+          {/* Título */}
+          <div style={{ marginBottom: 24 }}>
+            <h2
+              style={{
+                fontSize: "2.35rem",
+                fontWeight: 800,
+                color: "#fff",
+                lineHeight: 1.15,
+                marginBottom: 14,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Bienvenido a{" "}
+              <span
+                style={{
+                  background: "linear-gradient(90deg, #a5b4fc, #c7d2fe)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Dinerop
+              </span>
             </h2>
-            <p className="text-white/90 text-base leading-relaxed">
+            <p
+              style={{
+                color: "rgba(255,255,255,0.72)",
+                fontSize: "0.9rem",
+                lineHeight: 1.75,
+                maxWidth: 390,
+              }}
+            >
               Pioneros en la gestión de créditos e inversiones para cooperativas
-              y clientes. Nuestra plataforma conecta a personas con
-              oportunidades financieras, facilitando el acceso a créditos e
-              inversiones de manera transparente y eficiente.
+              y clientes. Conectamos personas con oportunidades financieras de
+              manera transparente y eficiente.
             </p>
           </div>
 
-          {/* Lista de características */}
-          <div className="space-y-3 mb-8">
-            <FeatureItem title="Invierte con confianza" />
+          {/* Features */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              marginBottom: 28,
+            }}
+          >
             <FeatureItem title="Elige entre cooperativas según tu ubicación" />
             <FeatureItem title="Solicita tu crédito en línea" />
             <FeatureItem title="Elige entre cooperativas que más te convengan" />
@@ -128,67 +225,195 @@ export default function Login() {
           </div>
 
           {/* Botones de acción */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+              marginBottom: 28,
+            }}
+          >
             <button
+              className="left-btn-shimmer"
               onClick={() => {
                 setCreditRequestType("CREDITO");
                 setShowCreditRequestModal(true);
               }}
-              className="bg-success hover:bg-opacity-80 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 duration-200 flex items-center justify-center gap-2"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                background: "linear-gradient(135deg, #10b981, #059669)",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "0.875rem",
+                padding: "13px 16px",
+                borderRadius: 14,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(16,185,129,0.38)",
+                transition: "transform 0.15s, box-shadow 0.2s",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 24px rgba(16,185,129,0.48)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 16px rgba(16,185,129,0.38)";
+              }}
             >
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <circle cx="12" cy="12" r="3" />
+                <path d="M6 9h.01M18 15h.01" />
+              </svg>
               <span>Solicitar crédito</span>
-              <span>→</span>
             </button>
+
             <button
+              className="left-btn-shimmer"
               onClick={() => {
                 setCreditRequestType("INVERSION");
                 setShowCreditRequestModal(true);
               }}
-              className="bg-accent hover:bg-opacity-80 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 duration-200 flex items-center justify-center gap-2"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "0.875rem",
+                padding: "13px 16px",
+                borderRadius: 14,
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(245,158,11,0.38)",
+                transition: "transform 0.15s, box-shadow 0.2s",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 24px rgba(245,158,11,0.48)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 16px rgba(245,158,11,0.38)";
+              }}
             >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
               <span>Realizar inversión</span>
-              <span>→</span>
             </button>
           </div>
 
-          {/* Estadísticas */}
-          <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/20">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-1">50+</div>
-              <div className="text-white/70 text-sm font-medium">
-                Cooperativas
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white mb-1">10k+</div>
-              <div className="text-white/70 text-sm font-medium">Usuarios</div>
+          {/* Divider + Carousel & Contador */}
+          <div
+            style={{
+              borderTop: "1px solid rgba(255,255,255,0.15)",
+              paddingTop: 24,
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 24,
+                alignItems: "center",
+              }}
+            >
+              <CooperativesCarousel />
+              <PlatformVisitsCounter />
             </div>
           </div>
         </div>
       </div>
 
       {/* Columna derecha - Login */}
-      <div className="w-full lg:w-2/5 flex items-center justify-center p-6 overflow-y-auto bg-gradient-to-b from-white to-gray-50">
+      <div
+        className="w-full lg:w-2/5 flex items-center justify-center p-6 overflow-y-auto"
+        style={{
+          background: "linear-gradient(160deg, #f8fafc 0%, #eef2f7 100%)",
+        }}
+      >
         <div className="max-w-sm w-full">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Bienvenido
-            </h1>
-            <p className="text-gray-500 text-sm">
-              Inicia una solicitud de credito o inversion para crear tu cuenta y
-              puedas ver el estado de tus solicitudes
+          {/* Encabezado con icono */}
+          <div className="mb-7 text-center">
+            <div
+              className="mx-auto mb-4 flex items-center justify-center"
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 16,
+                background: "linear-gradient(135deg, #ffffff, #ffffff)",
+                boxShadow: "0 8px 24px rgba(111, 104, 255, 0.3)",
+              }}
+            >
+              <img
+                src={LogoDinerop}
+                alt="DinerUp Logo"
+                style={{
+                  height: 50,
+                  objectFit: "contain",
+                }}
+              />
+            </div>
+            <p className="text-sm text-gray-500">
+              Ingresa tus credenciales para continuar
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          {/* Card del formulario */}
+          <div
+            className="bg-white rounded-2xl p-7 border"
+            style={{
+              borderColor: "rgba(226,232,240,0.9)",
+              boxShadow:
+                "0 4px 6px -1px rgba(15,23,42,0.04), 0 12px 40px -4px rgba(15,23,42,0.09)",
+            }}
+          >
+            {/* Error */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-r-lg">
-                <p className="text-red-700 text-sm font-medium flex items-center gap-2">
-                  {error}
-                </p>
+              <div
+                className="mb-5 p-3 rounded-xl flex items-center gap-2"
+                style={{
+                  background: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  borderLeft: "4px solid #f87171",
+                }}
+              >
+                <span className="text-red-400 text-base leading-none">⚠</span>
+                <p className="text-red-700 text-sm font-semibold">{error}</p>
               </div>
             )}
 
+            {/* Formulario — sin cambios funcionales */}
             <form
               onSubmit={loginForm.handleSubmit(onLogin)}
               className="space-y-5"
@@ -211,23 +436,85 @@ export default function Login() {
                 placeholder="••••••••"
               />
 
-              <div className="text-right pt-1">
+              {/* ¿Olvidaste? */}
+              <div className="text-right" style={{ marginTop: 2 }}>
                 <a
                   href="/forgot-password"
-                  className="text-sm font-semibold text-brand-primary hover:text-brand-secondary transition-colors"
+                  className="text-sm font-semibold transition-colors"
+                  style={{ color: "#4f46e5" }}
+                  onMouseOver={(e) => (e.currentTarget.style.color = "#3730a3")}
+                  onMouseOut={(e) => (e.currentTarget.style.color = "#4f46e5")}
                 >
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
 
+              {/* Botón submit con shimmer */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-brand-secondary to-brand-dark text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed duration-200 mt-6"
+                className="login-btn-shimmer w-full text-white font-bold py-3 rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  marginTop: 8,
+                  background:
+                    "linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)",
+                  boxShadow: "0 4px 18px rgba(79,70,229,0.35)",
+                  fontSize: "0.95rem",
+                  letterSpacing: "0.01em",
+                  transform: "translateY(0)",
+                  transition: "transform 0.15s, box-shadow 0.2s",
+                }}
+                onMouseOver={(e) => {
+                  if (!isLoading) {
+                    (e.currentTarget as HTMLButtonElement).style.transform =
+                      "translateY(-2px)";
+                    (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                      "0 8px 26px rgba(79,70,229,0.45)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.transform =
+                    "translateY(0)";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                    "0 4px 18px rgba(79,70,229,0.35)";
+                }}
               >
-                {isLoading ? "Ingresando..." : "Iniciar sesión"}
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="login-spinner" />
+                    Ingresando...
+                  </span>
+                ) : (
+                  "Iniciar sesión"
+                )}
               </button>
             </form>
+          </div>
+
+          {/* Footer de confianza */}
+          <div className="mt-5 flex items-center justify-center gap-1.5">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#94a3b8"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <p className="text-xs text-gray-400">
+              Conexión segura SSL · Al ingresar aceptas nuestra{" "}
+              <a
+                href="#"
+                className="text-indigo-400 font-medium hover:text-indigo-600 transition-colors"
+              >
+                Política de privacidad
+              </a>
+            </p>
           </div>
         </div>
       </div>
