@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { completeRegistration } from "../../api/auth.api";
+import { getErrorMessage } from "../../api/errors";
 
 type Props = {
   defaultEmail?: string;
@@ -27,8 +28,8 @@ export default function CompleteRegistrationModal({
       setLoading(true);
       await completeRegistration({ email, password });
       onCompleted();
-    } catch (e: any) {
-      setError(e?.message || "No se pudo completar el registro.");
+    } catch (e) {
+      setError(getErrorMessage(e, "No se pudo completar el registro."));
     } finally {
       setLoading(false);
     }

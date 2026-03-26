@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 import Step1Identity from "./steps/Step1Identity";
 import Step2PersonalDetails from "./steps/Step2PersonalDetails";
@@ -15,10 +15,8 @@ import {
   type OnboardingPayload,
   type SolicitanteData,
 } from "../api/onboarding.api";
+import { ApiError, getErrorMessage } from "../api/errors";
 
-/* =======================
-   MODELO BASE SOLICITANTE
-======================= */
 const EMPTY_SOLICITANTE: SolicitanteData = {
   nombres: "",
   apellidos: "",
@@ -28,6 +26,7 @@ const EMPTY_SOLICITANTE: SolicitanteData = {
   ocupacion: "",
   empresaTrabajo: "",
   telefono: "",
+  email: "",
   tieneConyuge: false,
   direccion: {
     provincia: "",
@@ -65,13 +64,12 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [successMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"success" | "already_completed">("success");
+  const [modalType, setModalType] = useState<"success" | "already_completed">(
+    "success",
+  );
 
-  /* =======================
-     ESTADO CENTRAL
-  ======================= */
   const [formData, setFormData] = useState({
     destinoCredito: "",
     solicitante: { ...EMPTY_SOLICITANTE },
@@ -86,9 +84,6 @@ export default function OnboardingPage() {
   const totalSteps = hasSpouse ? 6 : 5;
   const progress = (step / totalSteps) * 100;
 
-  /* =======================
-     SUBMIT FINAL
-  ======================= */
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
@@ -107,36 +102,29 @@ export default function OnboardingPage() {
 
       if (response?.status === "COMPLETED" || response?.status === "success") {
         updateUser({ ...user, onboarding: true });
-        // Mostrar modal de éxito
         setModalType("success");
         setShowModal(true);
       } else {
         throw new Error(response?.message || "Onboarding no completado");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      const errorStatus = (err as any)?.status;
+      const errorMessage = getErrorMessage(err);
+      const errorStatus = err instanceof ApiError ? err.status : undefined;
 
-      console.error("❌ Error enviando onboarding:", err);
-
-      // 🔹 MANEJO DE ERROR DE NEGOCIO: Ya completó onboarding
       if (
         errorStatus === 400 &&
         errorMessage.includes("ya ha completado el formulario de onboarding")
       ) {
-        console.log(
-          "ℹ️ Usuario ya completó onboarding, mostrando modal..."
-        );
-        // Actualizar el estado del usuario
         updateUser({ ...user, onboarding: true });
-        // Mostrar modal de ya completado
         setModalType("already_completed");
         setShowModal(true);
         return;
       }
 
-      // 🔹 OTROS ERRORES: mostrar mensaje de error genérico
-      setError("Ocurrió un error al guardar la información. Intenta de nuevo.");
+      setError(
+        errorMessage ||
+          "Ocurrio un error al guardar la informacion. Intenta de nuevo.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -144,7 +132,6 @@ export default function OnboardingPage() {
 
   const handleModalClose = () => {
     setShowModal(false);
-    // Redirigir al dashboard después de cerrar el modal
     setTimeout(() => {
       navigate("/dashboard-client");
     }, 300);
@@ -153,16 +140,14 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 px-4 py-10 flex justify-center">
       <div className="bg-white w-full max-w-3xl p-10 rounded-2xl shadow-xl border border-gray-100">
-
-        {/* PROGRESS */}
         <div className="mb-8">
           <div className="flex justify-between text-sm font-medium text-gray-600 mb-2">
             <span>Identidad</span>
             <span>Datos Personales</span>
             <span>Domicilio</span>
-            <span>Economía</span>
-            {hasSpouse && <span>Cónyuge</span>}
-            <span>Confirmación</span>
+            <span>Economia</span>
+            {hasSpouse && <span>Conyuge</span>}
+            <span>Confirmacion</span>
           </div>
 
           <div className="w-full bg-gray-200 h-2 rounded-full">
@@ -174,11 +159,11 @@ export default function OnboardingPage() {
         </div>
 
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Completar Información
+          Completar Informacion
         </h1>
 
         <p className="text-gray-600 mb-8">
-          Este formulario se llena una sola vez. Luego podrás solicitar créditos
+          Este formulario se llena una sola vez. Luego podras solicitar creditos
           sin volver a ingresar tus datos.
         </p>
 
@@ -190,19 +175,17 @@ export default function OnboardingPage() {
 
         {successMessage && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center gap-2">
-            <span className="text-xl">✓</span>
+            <span className="text-xl">OK</span>
             {successMessage}
           </div>
         )}
 
-        {/* Modal de éxito/completado */}
         <SuccessOnboardingModal
           open={showModal}
           onClose={handleModalClose}
           type={modalType}
         />
 
-        {/* STEPS */}
         {step === 1 && (
           <Step1Identity
             data={formData}

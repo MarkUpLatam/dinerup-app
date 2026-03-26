@@ -229,16 +229,15 @@ export default function PublicCreditRequestModal({
     setIsLoading(true);
 
     try {
-      await httpClient("/public-request", {
-        baseUrl: import.meta.env.VITE_API_CREDIT_REQUESTS,
+      await httpClient("/api/credits/public-request", {
         method: "POST",
-        body: JSON.stringify({
+        body: {
           ...formData,
           amount: Number(formData.amount),
           plazoMeses: Number(formData.plazoMeses),
           type,
           creditType: type === "CREDITO" ? formData.creditType : "INVERSION",
-        }),
+        },
         auth: false,
       });
 

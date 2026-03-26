@@ -1,90 +1,126 @@
-// src/api/httpClient.ts
-export async function httpClient<T = any>(
+import { emitUnauthorizedEvent } from "./authEvents";
+import { readStoredToken } from "./authStorage";
+import { API_BASE_URL } from "./config";
+import { ApiError } from "./errors";
+
+const PUBLIC_PATH_PREFIXES = ["/api/auth/"];
+const PUBLIC_ROUTE_RULES = [
+  { method: "POST", path: "/api/credits/public-request" },
+  { method: "POST", path: "/api/cooperatives" },
+];
+
+function normalizePath(urlOrPath: string): string {
+  if (/^https?:\/\//i.test(urlOrPath)) {
+    return new URL(urlOrPath).pathname;
+  }
+
+  return urlOrPath.startsWith("/") ? urlOrPath : `/${urlOrPath}`;
+}
+
+function shouldSendAuthHeader(path: string, method: string, auth?: boolean) {
+  if (typeof auth === "boolean") {
+    return auth;
+  }
+
+  if (PUBLIC_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))) {
+    return false;
+  }
+
+  return !PUBLIC_ROUTE_RULES.some(
+    (rule) => rule.method === method && rule.path === path,
+  );
+}
+
+type HttpClientOptions = Omit<RequestInit, "body"> & {
+  auth?: boolean;
+  body?: BodyInit | object | null;
+};
+
+export async function httpClient<T = unknown>(
   urlOrPath: string,
-  options: RequestInit & {
-    baseUrl?: string;
-    auth?: boolean;
-  } = {}
-): Promise<T | null> {
-  const { baseUrl = "", auth = true, headers, ...rest } = options;
-
-  const token = localStorage.getItem("auth_token");
-  const finalUrl = baseUrl ? `${baseUrl}${urlOrPath}` : urlOrPath;
-
-  console.log("Llamada a:", finalUrl);
-  console.log("Token enviado:", auth ? token : "NO AUTH");
+  options: HttpClientOptions = {},
+): Promise<T> {
+  const { auth, headers, ...rest } = options;
+  const method = (rest.method ?? "GET").toUpperCase();
+  const path = normalizePath(urlOrPath);
+  const shouldAuth = shouldSendAuthHeader(path, method, auth);
+  const token = readStoredToken();
+  const finalUrl = /^https?:\/\//i.test(urlOrPath)
+    ? urlOrPath
+    : `${API_BASE_URL}${path}`;
 
   const finalHeaders: Record<string, string> = {
+    Accept: "application/json",
     ...(headers as Record<string, string>),
   };
 
-  // 🔹 Solo setear Content-Type cuando NO sea GET
-  if (rest.method && rest.method !== "GET") {
+  if (
+    rest.body &&
+    !(rest.body instanceof FormData) &&
+    !(rest.body instanceof URLSearchParams)
+  ) {
     finalHeaders["Content-Type"] = "application/json";
   }
 
-  // 🔹 Agregar Authorization solo si auth === true
-  if (auth && token) {
-    finalHeaders["Authorization"] = `Bearer ${token}`;
+  if (shouldAuth && token) {
+    finalHeaders.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(finalUrl, {
     ...rest,
     body:
-      rest.body && typeof rest.body === "object"
+      rest.body &&
+      typeof rest.body === "object" &&
+      !(rest.body instanceof FormData) &&
+      !(rest.body instanceof URLSearchParams)
         ? JSON.stringify(rest.body)
         : rest.body,
     headers: finalHeaders,
   });
 
-  // SOLO manejar 401 automático cuando auth === true
-  if (response.status === 401 && auth) {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
-    window.location.href = "/login";
-    throw new Error("Sesión expirada");
-  }
-
-  // Leer body una sola vez
   const text = await response.text();
   const data = text ? safeParse(text) : null;
 
   if (!response.ok) {
-    // Intentar extraer el mensaje del servidor en este orden:
-    // 1. data.message (formato JSON con campo 'message')
-    // 2. data.error (formato JSON con campo 'error')
-    // 3. data si es string
-    // 4. text completo
-    // 5. Mensaje por defecto según status
     let msg = "Request failed";
 
     if (data && typeof data === "object") {
       if ("message" in data && data.message) {
-        msg = (data as any).message;
+        msg = String(data.message);
       } else if ("error" in data && data.error) {
-        msg = (data as any).error;
+        msg = String(data.error);
       }
     } else if (typeof data === "string" && data) {
       msg = data;
     } else if (text) {
       msg = text;
     } else {
-      // Mensajes por defecto según status HTTP
       const statusMessages: Record<number, string> = {
-        409: "Esta acción ya ha sido realizada anteriormente",
-        400: "Solicitud inválida",
+        400: "Solicitud invalida",
+        401: "Sesion expirada",
+        403: "No autorizado",
         404: "Recurso no encontrado",
+        409: "Esta accion ya ha sido realizada anteriormente",
         500: "Error en el servidor",
       };
       msg = statusMessages[response.status] || `Error ${response.status}`;
     }
 
-    const error = new Error(msg);
-    (error as any).status = response.status;
+    const error = new ApiError(msg, {
+      status: response.status,
+      data,
+    });
+
+    // httpClient.ts
+    if (response.status === 401 && shouldAuth) {
+      // solo 401
+      emitUnauthorizedEvent();
+    }
+
     throw error;
   }
 
-  return data as T | null;
+  return data as T;
 }
 
 function safeParse(text: string) {

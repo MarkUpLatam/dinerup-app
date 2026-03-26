@@ -51,8 +51,9 @@ const saveUsers = (users: User[]) => {
 // Autenticación
 export const login = async (
   email: string,
-  password: string
+  _password: string
 ): Promise<User | null> => {
+  void _password;
   await delay();
   const users = getUsers();
   const user = users.find((u) => u.email === email);
@@ -68,9 +69,10 @@ export const login = async (
 export const register = async (
   name: string,
   email: string,
-  password: string,
+  _password: string,
   type: "client" | "cooperative"
 ): Promise<User> => {
+  void _password;
   await delay();
   const users = getUsers();
 

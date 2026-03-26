@@ -1,5 +1,5 @@
-import { Building2, LogOut, User } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { LogOut } from "lucide-react";
+import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import logo from "../images/LogoDinerop.png";
 
@@ -27,7 +27,7 @@ export default function Navbar() {
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800">DinerUp</h1>
+              <h1 className="text-xl font-bold text-gray-800">Dinerop</h1>
               <p className="text-xs text-gray-500">by MarkUp</p>
             </div>
           </div>

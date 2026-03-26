@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { activateAccount } from "../api/auth.api";
+import { getErrorMessage } from "../api/errors";
 
 type Status = "loading" | "success" | "error";
 
@@ -15,32 +16,31 @@ export default function ActivateAccount() {
 
     if (!token) {
       setStatus("error");
-      setMessage("Falta el token en el enlace de activación.");
+      setMessage("Falta el token en el enlace de activacion.");
       return;
     }
 
-    (async () => {
+    void (async () => {
       try {
         await activateAccount(token);
         setStatus("success");
-        setMessage(" Cuenta activada correctamente. Redirigiendo al inicio de sesión...");
-      } catch (e: any) {
+        setMessage(
+          "Cuenta activada correctamente. Redirigiendo al inicio de sesion...",
+        );
+      } catch (e) {
         setStatus("error");
-        setMessage(e?.message || "Token inválido o expirado.");
+        setMessage(getErrorMessage(e, "Token invalido o expirado."));
       } finally {
-
         localStorage.setItem("just_activated", "true");
         setTimeout(() => navigate("/"), 2000);
       }
-
-
     })();
-  }, []);
+  }, [navigate, searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-lg p-8 text-center">
-        <h1 className="text-2xl font-bold mb-2">Activación de cuenta</h1>
+        <h1 className="text-2xl font-bold mb-2">Activacion de cuenta</h1>
         <p className="text-slate-600 mb-6">{message}</p>
 
         {status === "loading" && (
@@ -58,7 +58,8 @@ export default function ActivateAccount() {
               Ir al login
             </Link>
             <p className="text-sm text-slate-500">
-              Si el enlace expiró, solicita uno nuevo desde soporte o reintenta registro.
+              Si el enlace expiro, solicita uno nuevo desde soporte o reintenta
+              registro.
             </p>
           </div>
         )}

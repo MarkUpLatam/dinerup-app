@@ -1,97 +1,105 @@
 import {
-  createContext,
-  useContext,
   useState,
   useEffect,
   ReactNode,
 } from "react";
 
+import { AUTH_UNAUTHORIZED_EVENT } from "../api/authEvents";
+import { AuthContext } from "./auth-context";
+import {
+  AuthUser,
+  clearStoredAuth,
+  extractToken,
+  readStoredToken,
+  readStoredUser,
+  storeAuthSession,
+  storeAuthUser,
+} from "../api/authStorage";
 import { loginRequest } from "../api/auth.api";
-
-interface AuthContextType {
-  user: any | null;
-  token: string | null;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<any>;
-  logout: () => void;
-  updateUser: (newUser: any) => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { resetUnauthorizedEventState } from "../api/authEvents";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const isAuthenticated = Boolean(token && user);
 
-  // 🔹 Actualizar usuario desde cualquier parte
-  const updateUser = (newUser: any) => {
+  const updateUser = (newUser: AuthUser) => {
     setUser(newUser);
-    localStorage.setItem("auth_user", JSON.stringify(newUser));
+    storeAuthUser(newUser);
   };
 
-  // 🔹 Cargar sesión persistida
   useEffect(() => {
     try {
-      const savedToken = localStorage.getItem("auth_token");
-      const savedUser = localStorage.getItem("auth_user");
+      const savedToken = readStoredToken();
+      const savedUser = readStoredUser();
 
-      if (savedToken) {
-        setToken(savedToken);
+      if (!savedToken || !savedUser) {
+        clearStoredAuth();
+        setUser(null);
+        setToken(null);
+        return;
       }
 
-      if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
-        setUser(JSON.parse(savedUser));
-      }
-    } catch (err) {
-      console.warn("Error leyendo localStorage", err);
+      setToken(savedToken);
+      setUser(savedUser);
+    } catch {
       setUser(null);
       setToken(null);
+      clearStoredAuth();
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // LOGIN
-  // IMPORTANTE:
-  // - No decide estados de negocio
-  // - No atrapa ni transforma errores
-  // - Propaga INCOMPLETE_REGISTRATION tal cual
   const login = async (email: string, password: string) => {
-    try {
-      const data = await loginRequest(email, password);
-      
-        if (data?.accessToken) {
-          setToken(data.accessToken);
-          localStorage.setItem("auth_token", data.accessToken);
-        }
+    const data = await loginRequest(email, password);
+    const nextToken = extractToken(data);
+    const nextUser = (data?.user as AuthUser | undefined) ?? null;
 
-      if (data?.user) {
-        setUser(data.user);
-        localStorage.setItem("auth_user", JSON.stringify(data.user));
-      }
-
-      return data?.user;
-
-    } catch (err) {
-
-      throw err;
+    if (!nextToken || !nextUser) {
+      clearStoredAuth();
+      setUser(null);
+      setToken(null);
+      throw new Error("La respuesta de autenticacion no contiene la sesion.");
     }
+
+    storeAuthSession(nextToken, nextUser);
+    setToken(nextToken);
+    setUser(nextUser);
+
+    return nextUser;
   };
 
-  // 🔓 LOGOUT
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
+    clearStoredAuth();
+    resetUnauthorizedEventState();
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleUnauthorized = () => {
+      logout();
+    };
+
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+
+    return () => {
+      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+    };
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
+        isAuthenticated,
         isLoading,
         login,
         logout,
@@ -101,13 +109,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-// Hook de consumo
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth debe usarse dentro de AuthProvider");
-  }
-  return context;
 };

@@ -1,7 +1,5 @@
 import { httpClient } from "./httpClient";
 
-const BASE_URL = import.meta.env.VITE_API_ONBOARDING;
-
 export interface DireccionData {
   provincia: string;
   canton: string;
@@ -64,7 +62,6 @@ export async function submitOnboarding(
   payload: OnboardingPayload,
 ): Promise<OnboardingSubmitResponse> {
   return httpClient(`/api/onboarding/cliente/solicitante`, {
-    baseUrl: BASE_URL,
     method: "POST",
     body: payload,
     auth: true,
@@ -79,16 +76,11 @@ export type OnboardingStatusResponse = {
 
 export function getOnboardingStatus(): Promise<OnboardingStatusResponse | null> {
   return httpClient<OnboardingStatusResponse>("/api/onboarding/me/status", {
-    baseUrl: import.meta.env.VITE_API_ONBOARDING,
     method: "GET",
     auth: true,
-  }).catch((error) => {
-    console.error("Error fetching onboarding status:", error);
-    return null;
   });
 }
 
-// Garante onboarding
 export interface GuaranteeOnboardingResponse {
   id: number;
   estado: string;
@@ -102,7 +94,6 @@ export async function submitGuaranteeOnboarding(
   return httpClient<GuaranteeOnboardingResponse>(
     `/api/onboarding/cliente/garante/completar`,
     {
-      baseUrl: BASE_URL,
       method: "POST",
       body: payload,
       auth: true,

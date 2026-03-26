@@ -117,7 +117,6 @@ export default function GuaranteeOnboardingModal({ open, onClose, onSuccess }: G
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      console.error("❌ Error enviando onboarding del garante:", err);
       setError(errorMsg || "Ocurrió un error al guardar la información. Intenta de nuevo.");
     } finally {
       setIsLoading(false);

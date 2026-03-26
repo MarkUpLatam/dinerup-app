@@ -56,8 +56,7 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
     try {
       const data = await getCreditRequestCooperatives(request.solicitudId);
       setCooperatives(data);
-    } catch (err) {
-      console.error("Error loading cooperatives:", err);
+    } catch {
       setError("Error al cargar las cooperativas");
     } finally {
       setIsLoading(false);
@@ -77,7 +76,6 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
       await acceptCreditCooperative(request.solicitudId, cooperativaId);
       setSelectedCooperativeId(cooperativaId);
     } catch (err) {
-      console.error("Error accepting cooperative:", err);
       
       // Extraer el mensaje de error del servidor o usar uno por defecto
       let errorMessage = "Error al aceptar la solicitud. Por favor intenta de nuevo.";

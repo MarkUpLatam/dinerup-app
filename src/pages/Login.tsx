@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Building2, User } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import CompleteRegistrationModal from "../components/auth/CompleteRegistrationModal";
 import PublicCreditRequestModal from "../components/PublicCreditRequestModal";
 import WelcomePopup from "../components/WelcomePopup";
@@ -59,7 +59,8 @@ export default function Login() {
 
     try {
       const result = await authLogin(data.email, data.password);
-      const rawRole = result?.role.toLowerCase();
+      const rawRole =
+        typeof result?.role === "string" ? result.role.toLowerCase() : "";
 
       if (!rawRole) {
         setError("No se pudo determinar el tipo de usuario.");
@@ -76,8 +77,7 @@ export default function Login() {
       navigate(
         userRole === "client" ? "/dashboard-client" : "/dashboard-cooperative",
       );
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Credenciales incorrectas o error al iniciar sesión");
     } finally {
       setIsLoading(false);

@@ -1,0 +1,99 @@
+Proyecto: MarkUp App
+Directorio: d:/Steven/MarkUp/MarkUp App/MarkUp Project/frontend/dinerUp
+
+Estructura del Proyecto:
+
+- eslint.config.js
+- index.html
+- netlify.toml
+- package.json
+- postcss.config.js
+- tailwind.config.js
+- tsconfig.app.json
+- tsconfig.json
+- tsconfig.node.json
+- vercel.json
+- vite.config.ts
+
+Carpetas y Archivos:
+
+public/
+src/
+  - App.tsx
+  - index.css
+  - main.tsx
+  - vite-env.d.ts
+
+  api/
+    - auth.api.ts
+    - authEvents.ts
+    - authStorage.ts
+    - config.ts
+    - cooperatives.api.ts
+    - creditRequests.api.ts
+    - errors.ts
+    - httpClient.ts
+    - onboarding.api.ts
+
+  components/
+    - CooperativeCard.tsx
+    - CooperativesCarousel.tsx
+    - CreditCard.tsx
+    - CreditDetailsModal.tsx
+    - Footer.tsx
+    - GuaranteeOnboardingModal.tsx
+    - Navbar.tsx
+    - NewCreditModal.tsx
+    - NewInvestmentModal.tsx
+    - OnboardingPopup.tsx
+    - PlatformVisitsCounter.tsx
+    - PreApprovalModal.tsx
+    - PublicCreditRequestModal.tsx
+    - SuccessOnboardingModal.tsx
+    - SuccessRequestModal.tsx
+    - UnderDevelopment.tsx
+    - WelcomePopup.tsx
+
+    auth/
+      - CompleteRegistrationModal.tsx
+
+  context/
+    - auth-context.ts
+    - AuthContext.tsx
+    - useAuth.ts
+
+  data/
+    - ecuadorProvinces.ts
+
+  images/
+    cooperatives/
+
+  pages/
+    - ActivateAccount.tsx
+    - DashboardClient.tsx
+    - DashboardCooperative.tsx
+    - Login.tsx
+    - OnboardingPage.tsx
+
+    password/
+      - ForgotPassword.tsx
+      - ResetPassword.tsx
+
+    steps/
+      - Step1Identity.tsx
+      - Step2PersonalDetails.tsx
+      - Step3Address.tsx
+      - Step4Economic.tsx
+      - Step4Review.tsx
+      - Step5Spouse.tsx
+
+  types/
+    - cooperative.ts
+    - credit.ts
+    - creditDecision.ts
+    - creditEstado.ts
+    - index.ts
+    - onboarding.ts
+
+  utils/
+    - mockAPI.ts

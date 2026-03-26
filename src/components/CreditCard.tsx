@@ -2,14 +2,13 @@ import { useState } from "react";
 import {
   Calendar,
   DollarSign,
-  Building2,
-  CheckCircle,
   Clock,
   XCircle,
   TrendingUp,
   Wallet,
   ArrowRight,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import type { CreditRequest } from "../types/credit";
 import { CreditEstado } from "../types/creditEstado";
@@ -27,7 +26,7 @@ const statusMap: Record<
   {
     label: string;
     color: string;
-    icon: any;
+    icon: LucideIcon;
     dotColor: string;
   }
 > = {
@@ -43,11 +42,11 @@ const statusMap: Record<
     icon: TrendingUp,
     dotColor: "bg-green-500",
   },
-  [CreditEstado.APROBADA]: {
-    label: "Aprobada",
-    color: "bg-green-50 text-green-700 border-green-200",
-    icon: CheckCircle,
-    dotColor: "bg-green-500",
+  [CreditEstado.SOLICITANDO_GARANTE]: {
+    label: "Solicitando garante",
+    color: "bg-amber-50 text-amber-700 border-amber-200",
+    icon: Clock,
+    dotColor: "bg-amber-500",
   },
   [CreditEstado.RECHAZADA]: {
     label: "Rechazada",

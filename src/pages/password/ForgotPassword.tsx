@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { forgotPassword } from "../../api/auth.api";
 import { Link } from "react-router-dom";
+import { forgotPassword } from "../../api/auth.api";
+import { getErrorMessage } from "../../api/errors";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -20,11 +21,13 @@ export default function ForgotPassword() {
     try {
       setLoading(true);
       const res = await forgotPassword(email);
-      // res puede ser string o {message}, tu httpClient devuelve texto si no es JSON
-      setMsg(typeof res === "string" ? res : "Si el correo existe, se enviaron instrucciones");
-    } catch (e: any) {
-      // aunque el backend diga 200 siempre, dejamos esto por si algo falla (CORS, caída, etc.)
-      setError(e?.message || "No se pudo procesar la solicitud.");
+      setMsg(
+        typeof res === "string"
+          ? res
+          : "Si el correo existe, se enviaron instrucciones",
+      );
+    } catch (e) {
+      setError(getErrorMessage(e, "No se pudo procesar la solicitud."));
     } finally {
       setLoading(false);
     }
@@ -33,13 +36,13 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 border border-neutral-100">
-        <h1 className="text-2xl font-bold mb-2">Recuperar contraseña</h1>
+        <h1 className="text-2xl font-bold mb-2">Recuperar contrasena</h1>
         <p className="text-sm text-neutral-600 mb-4">
-          Te enviaremos un enlace para restablecer tu contraseña.
+          Te enviaremos un enlace para restablecer tu contrasena.
         </p>
 
         <label className="block text-sm font-semibold text-neutral-700 mb-1">
-          Correo electrónico
+          Correo electronico
         </label>
         <input
           type="email"
@@ -70,7 +73,10 @@ export default function ForgotPassword() {
         </button>
 
         <div className="mt-4 text-center">
-          <Link to="/" className="text-sm font-semibold text-brand-primary hover:underline">
+          <Link
+            to="/"
+            className="text-sm font-semibold text-brand-primary hover:underline"
+          >
             Volver al login
           </Link>
         </div>
