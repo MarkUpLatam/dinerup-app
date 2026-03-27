@@ -24,7 +24,7 @@ export async function completeRegistration(payload: {
   email: string;
   password: string;
 }) {
-  return httpClient("/api/auth/register", {
+  return httpClient("/api/auth/complete-registration", {
     method: "POST",
     body: payload,
     auth: false,

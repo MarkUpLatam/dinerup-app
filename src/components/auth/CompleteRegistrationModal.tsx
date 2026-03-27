@@ -1,15 +1,18 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { completeRegistration } from "../../api/auth.api";
 import { getErrorMessage } from "../../api/errors";
 
 type Props = {
   defaultEmail?: string;
   onCompleted: () => void;
+  onClose: () => void;
 };
 
 export default function CompleteRegistrationModal({
   defaultEmail = "",
   onCompleted,
+  onClose,
 }: Props) {
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState("");
@@ -37,8 +40,16 @@ export default function CompleteRegistrationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+          aria-label="Cerrar"
+        >
+          <X className="w-5 h-5" />
+        </button>
         <h2 className="text-xl font-bold mb-1">Completa tu registro</h2>
+
         <p className="text-sm text-neutral-600 mb-4">
           Acabas de activar tu cuenta. Define una contraseña para continuar.
         </p>

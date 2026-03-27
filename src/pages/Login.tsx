@@ -35,12 +35,17 @@ export default function Login() {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
 
-  // Mostrar modal solo como sugerencia tras activación
+  // Mostrar modal tras activación y pre-cargar email si viene en localStorage
   useEffect(() => {
     const justActivated = localStorage.getItem("just_activated") === "true";
     if (justActivated) {
+      const activatedEmail = localStorage.getItem("activated_email") ?? "";
+      if (activatedEmail) {
+        loginForm.setValue("email", activatedEmail);
+      }
       setShowCompleteRegistration(true);
       localStorage.removeItem("just_activated");
+      localStorage.removeItem("activated_email");
     }
   }, []);
 
@@ -523,6 +528,7 @@ export default function Login() {
       {showCompleteRegistration && (
         <CompleteRegistrationModal
           defaultEmail={loginForm.watch("email")}
+          onClose={() => setShowCompleteRegistration(false)}
           onCompleted={() => {
             setShowCompleteRegistration(false);
             setError("Registro completado. Ahora puedes iniciar sesión.");

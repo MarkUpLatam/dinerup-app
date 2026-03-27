@@ -22,17 +22,18 @@ export default function ActivateAccount() {
 
     void (async () => {
       try {
-        await activateAccount(token);
+        const result = await activateAccount(token) as Record<string, unknown> | null;
+        localStorage.setItem("just_activated", "true");
+        if (result?.email && typeof result.email === "string") {
+          localStorage.setItem("activated_email", result.email);
+        }
         setStatus("success");
-        setMessage(
-          "Cuenta activada correctamente. Redirigiendo al inicio de sesion...",
-        );
+        setMessage("Cuenta activada. Redirigiendo...");
+        setTimeout(() => navigate("/"), 2000);
       } catch (e) {
         setStatus("error");
-        setMessage(getErrorMessage(e, "Token invalido o expirado."));
-      } finally {
-        localStorage.setItem("just_activated", "true");
-        setTimeout(() => navigate("/"), 2000);
+        setMessage(getErrorMessage(e, "Token inválido o expirado."));
+        // NO redirige, NO guarda el flag
       }
     })();
   }, [navigate, searchParams]);
