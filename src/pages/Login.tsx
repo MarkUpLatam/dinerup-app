@@ -72,15 +72,22 @@ export default function Login() {
         return;
       }
 
-      const userRole = rawRole === "client" ? "client" : "cooperative";
+      // Validar que el role sea exactamente uno de los dos valores esperados
+      if (rawRole !== "client" && rawRole !== "cooperative") {
+        setError("Tipo de cuenta no reconocido.");
+        return;
+      }
 
-      if (userRole !== data.userType) {
-        setError(`Esta cuenta es de tipo ${rawRole}`);
+      if (rawRole !== data.userType) {
+        const roleLabel = rawRole === "client" ? "Cliente" : "Cooperativa";
+        setError(
+          `Esta cuenta es de tipo ${roleLabel}. Por favor selecciona el perfil correcto.`,
+        );
         return;
       }
 
       navigate(
-        userRole === "client" ? "/dashboard-client" : "/dashboard-cooperative",
+        rawRole === "client" ? "/dashboard-client" : "/dashboard-cooperative",
       );
     } catch {
       setError("Credenciales incorrectas o error al iniciar sesión");

@@ -43,10 +43,6 @@ function PublicOnlyRoute() {
     return <AuthLoadingScreen />;
   }
 
-  if (isAuthenticated && user?.role) {
-    return <Navigate to={getDashboardPath(user.role)} replace />;
-  }
-
   return <Outlet />;
 }
 
