@@ -11,7 +11,7 @@ import {
 import { useAuth } from "../context/useAuth";
 
 import { getCooperatives } from "../api/cooperatives.api";
-import { getMyCreditRequests } from "../api/creditRequests.api";
+import { getMyCreditRequests, createCreditRequest } from "../api/creditRequests.api";
 import { getErrorMessage } from "../api/errors";
 import { getOnboardingStatus } from "../api/onboarding.api";
 
@@ -128,16 +128,34 @@ export default function DashboardClient() {
     setShowInvestmentModal(true);
   };
 
-  const handleCreditSubmit = (data: { amount: number; type: string }) => {
-    void data;
-    setCreditSuccess(true);
-    setTimeout(() => setCreditSuccess(false), 5000);
+  const handleCreditSubmit = async (data: { amount: number; type: string }) => {
+    try {
+      await createCreditRequest({
+        monto: data.amount,
+        type: "CREDITO",
+        creditType: data.type,
+      });
+      setCreditSuccess(true);
+      setTimeout(() => setCreditSuccess(false), 5000);
+      void loadData();
+    } catch (error) {
+      setPageError(getErrorMessage(error, "No se pudo enviar la solicitud de crédito."));
+    }
   };
 
-  const handleInvestmentSubmit = (data: { amount: number }) => {
-    void data;
-    setInvestmentSuccess(true);
-    setTimeout(() => setInvestmentSuccess(false), 5000);
+  const handleInvestmentSubmit = async (data: { amount: number }) => {
+    try {
+      await createCreditRequest({
+        monto: data.amount,
+        type: "INVERSION",
+        creditType: null,   // ✅ no aplica para inversiones
+      });
+      setInvestmentSuccess(true);
+      setTimeout(() => setInvestmentSuccess(false), 5000);
+      void loadData();
+    } catch (error) {
+      setPageError(getErrorMessage(error, "No se pudo registrar la inversión."));
+    }
   };
 
   return (

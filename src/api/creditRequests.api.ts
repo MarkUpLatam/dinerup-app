@@ -76,6 +76,18 @@ export const requestGuaranteeForCreditRequest = async (
   );
 };
 
+export const createCreditRequest = async (payload: {
+  monto: number;
+  type: string;
+  creditType?: string | null;
+}): Promise<void> => {
+  await httpClient<void>("/api/credits/me", {
+    method: "POST",
+    auth: true,
+    body: payload,
+  });
+};
+
 export const acceptCreditCooperative = async (
   solicitudId: number,
   cooperativaId: number,
