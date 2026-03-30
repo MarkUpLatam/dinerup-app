@@ -133,6 +133,8 @@ export default function PublicCreditRequestModal({
   type,
 }: PublicCreditRequestModalProps) {
   const [formData, setFormData] = useState<FormData>(getInitialFormState(type));
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showFullTerms, setShowFullTerms] = useState(false);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -140,6 +142,8 @@ export default function PublicCreditRequestModal({
   const resetForm = () => {
     setFormData(getInitialFormState(type));
     setErrors({});
+    setAcceptedTerms(false);
+    setShowFullTerms(false);
   };
 
   const availableCities = useMemo(() => {
@@ -174,6 +178,9 @@ export default function PublicCreditRequestModal({
       Number(formData.plazoMeses) > 60
     )
       newErrors.plazoMeses = "Máximo 60 meses";
+
+    if (!acceptedTerms)
+      newErrors.terms = "Debes aceptar los términos y condiciones para continuar";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -493,6 +500,50 @@ export default function PublicCreditRequestModal({
               </div>
             )}
           </SectionCard>
+
+          {/* ===== TÉRMINOS Y CONDICIONES ===== */}
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => {
+                  setAcceptedTerms(e.target.checked);
+                  if (e.target.checked && errors.terms) {
+                    setErrors((prev) => ({ ...prev, terms: "" }));
+                  }
+                }}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-brand-secondary cursor-pointer flex-shrink-0"
+              />
+              <span className="text-xs text-gray-700">
+                He leído y acepto los <strong>Términos y Condiciones</strong> y autorizo el{" "}
+                <strong>tratamiento de mis datos personales</strong>.{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowFullTerms((v) => !v)}
+                  className="text-brand-secondary underline hover:opacity-80 transition"
+                >
+                  {showFullTerms ? "Ocultar" : "Ver más"}
+                </button>
+              </span>
+            </label>
+
+            {showFullTerms && (
+              <p className="text-xs text-gray-500 leading-relaxed pl-7 border-t pt-2">
+                Al enviar este formulario, usted autoriza a <strong>DinerUp</strong> y a las cooperativas
+                asociadas al tratamiento de sus datos personales (nombre, identificación, correo electrónico,
+                teléfono, ubicación e información financiera) con la finalidad exclusiva de evaluar y gestionar
+                su solicitud de {type === "CREDITO" ? "crédito" : "inversión"}. El tratamiento se realizará
+                conforme a la <strong>Ley Orgánica de Protección de Datos Personales del Ecuador (LOPDP)</strong>{" "}
+                y sus reglamentos vigentes. Sus datos no serán vendidos ni compartidos con terceros ajenos al
+                proceso. Puede ejercer sus derechos ARCO contactando a <strong>soporte@dinerup.com</strong>.
+              </p>
+            )}
+
+            {errors.terms && (
+              <p className="text-xs text-red-600 pl-7">{errors.terms}</p>
+            )}
+          </div>
 
           {errors.submit && (
             <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-sm text-red-700">

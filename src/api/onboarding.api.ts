@@ -68,17 +68,16 @@ export async function submitOnboarding(
   });
 }
 
-export type OnboardingStatusResponse = {
-  clientId: number;
-  status: string;
-  completed: boolean;
+export type FormularioClienteStatus = {
+  formularioCompleto: boolean;
+  estadoFormulario: "PENDIENTE" | "SOLICITADO" | "COMPLETO";
 };
 
-export function getOnboardingStatus(): Promise<OnboardingStatusResponse | null> {
-  return httpClient<OnboardingStatusResponse>("/api/onboarding/me/status", {
-    method: "GET",
-    auth: true,
-  });
+export function getFormularioClienteStatus(): Promise<FormularioClienteStatus> {
+  return httpClient<FormularioClienteStatus>(
+    "/api/onboarding/cliente/formulario-status",
+    { method: "GET", auth: true },
+  );
 }
 
 export interface GuaranteeOnboardingResponse {

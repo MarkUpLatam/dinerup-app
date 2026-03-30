@@ -13,7 +13,7 @@ import { useAuth } from "../context/useAuth";
 import { getCooperatives } from "../api/cooperatives.api";
 import { getMyCreditRequests, createCreditRequest } from "../api/creditRequests.api";
 import { getErrorMessage } from "../api/errors";
-import { getOnboardingStatus } from "../api/onboarding.api";
+import { getFormularioClienteStatus } from "../api/onboarding.api";
 
 import type { Cooperative } from "../types/cooperative";
 import type { CreditRequest } from "../types/credit";
@@ -77,13 +77,8 @@ export default function DashboardClient() {
     try {
       setCheckingOnboarding(true);
       setPageError("");
-      const status = await getOnboardingStatus();
-
-      if (status && typeof status === "object" && "completed" in status) {
-        setNeedsOnboarding(!status.completed);
-      } else {
-        setNeedsOnboarding(true);
-      }
+      const status = await getFormularioClienteStatus();
+      setNeedsOnboarding(!status.formularioCompleto);
     } catch (error) {
       setPageError(
         getErrorMessage(error, "No se pudo verificar el estado de onboarding."),
@@ -99,9 +94,9 @@ export default function DashboardClient() {
       setCheckingOnboarding(true);
       setPageError("");
 
-      const status = await getOnboardingStatus();
+      const status = await getFormularioClienteStatus();
 
-      if (status && status.completed) {
+      if (status.formularioCompleto) {
         setNeedsOnboarding(false);
         setShowOnboardingCompletedPopup(true);
         return;
