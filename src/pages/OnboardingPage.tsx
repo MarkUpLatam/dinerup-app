@@ -8,7 +8,7 @@ import Step3Address from "./steps/Step3Address";
 import Step4Economic from "./steps/Step4Economic";
 import Step5Spouse from "./steps/Step5Spouse";
 import Step4Review from "./steps/Step4Review";
-import SuccessOnboardingModal from "../components/SuccessOnboardingModal";
+import SuccessOnboardingModal from "../components/onboarding/SuccessOnboardingModal";
 
 import {
   submitOnboarding,

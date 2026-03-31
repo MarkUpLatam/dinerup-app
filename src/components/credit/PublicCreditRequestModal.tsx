@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { X, Loader, User, MapPin, Wallet } from "lucide-react";
-import { httpClient } from "../api/httpClient";
+import { httpClient } from "../../api/httpClient";
 import SuccessRequestModal from "./SuccessRequestModal";
-import { ecuadorProvinces } from "../data/ecuadorProvinces";
+import { ecuadorProvinces } from "../../data/ecuadorProvinces";
 
 interface PublicCreditRequestModalProps {
   open: boolean;

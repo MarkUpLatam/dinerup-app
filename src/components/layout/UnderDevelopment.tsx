@@ -1,6 +1,6 @@
 import React from "react";
 import { Hammer, Rocket, Clock } from "lucide-react";
-import LogoDinerUp from "../images/LogoDinerUp.png";
+import LogoDinerUp from "../../images/LogoDinerUp.png";
 
 const UnderDevelopment: React.FC = () => {
   return (

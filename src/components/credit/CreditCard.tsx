@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import type { CreditRequest } from "../types/credit";
-import { CreditEstado } from "../types/creditEstado";
+import type { CreditRequest } from "../../types/credit";
+import { CreditEstado } from "../../types/creditEstado";
 import CreditDetailsModal from "./CreditDetailsModal";
 
 interface CreditCardProps {

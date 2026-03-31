@@ -4,7 +4,7 @@ import {
   ReactNode,
 } from "react";
 
-import { AUTH_UNAUTHORIZED_EVENT } from "../api/authEvents";
+import { AUTH_UNAUTHORIZED_EVENT } from "../api/auth/authEvents";
 import { AuthContext } from "./auth-context";
 import {
   AuthUser,
@@ -14,9 +14,9 @@ import {
   readStoredUser,
   storeAuthSession,
   storeAuthUser,
-} from "../api/authStorage";
-import { loginRequest } from "../api/auth.api";
-import { resetUnauthorizedEventState } from "../api/authEvents";
+} from "../api/auth/authStorage";
+import { loginRequest } from "../api/auth/auth.api";
+import { resetUnauthorizedEventState } from "../api/auth/authEvents";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);

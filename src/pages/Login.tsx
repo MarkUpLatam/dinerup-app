@@ -6,10 +6,10 @@ import { z } from "zod";
 import { Building2, User } from "lucide-react";
 import { useAuth } from "../context/useAuth";
 import CompleteRegistrationModal from "../components/auth/CompleteRegistrationModal";
-import PublicCreditRequestModal from "../components/PublicCreditRequestModal";
-import WelcomePopup from "../components/WelcomePopup";
-import CooperativesCarousel from "../components/CooperativesCarousel";
-import PlatformVisitsCounter from "../components/PlatformVisitsCounter";
+import PublicCreditRequestModal from "../components/credit/PublicCreditRequestModal";
+import WelcomePopup from "../components/layout/WelcomePopup";
+import CooperativesCarousel from "../components/cooperative/CooperativesCarousel";
+import PlatformVisitsCounter from "../components/layout/PlatformVisitsCounter";
 import LogoDinerop from "../images/LogoDinerop.png";
 
 // Schema de validación

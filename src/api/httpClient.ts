@@ -1,5 +1,5 @@
-import { emitUnauthorizedEvent } from "./authEvents";
-import { readStoredToken } from "./authStorage";
+import { emitUnauthorizedEvent } from "./auth/authEvents";
+import { readStoredToken } from "./auth/authStorage";
 import { API_BASE_URL } from "./config";
 import { ApiError } from "./errors";
 

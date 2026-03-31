@@ -11,20 +11,23 @@ import {
 import { useAuth } from "../context/useAuth";
 
 import { getCooperatives } from "../api/cooperatives.api";
-import { getMyCreditRequests, createCreditRequest } from "../api/creditRequests.api";
+import {
+  getMyCreditRequests,
+  createCreditRequest,
+} from "../api/creditRequests.api";
 import { getErrorMessage } from "../api/errors";
 import { getFormularioClienteStatus } from "../api/onboarding.api";
 
 import type { Cooperative } from "../types/cooperative";
 import type { CreditRequest } from "../types/credit";
 
-import CooperativeCard from "../components/CooperativeCard";
-import CreditCard from "../components/CreditCard";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import OnboardingPopup from "../components/OnboardingPopup";
-import NewCreditModal from "../components/NewCreditModal";
-import NewInvestmentModal from "../components/NewInvestmentModal";
+import CooperativeCard from "../components/cooperative/CooperativeCard";
+import CreditCard from "../components/credit/CreditCard";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import OnboardingPopup from "../components/onboarding/OnboardingPopup";
+import NewCreditModal from "../components/credit/NewCreditModal";
+import NewInvestmentModal from "../components/investment/NewInvestmentModal";
 
 export default function DashboardClient() {
   const { user } = useAuth();
@@ -134,7 +137,9 @@ export default function DashboardClient() {
       setTimeout(() => setCreditSuccess(false), 5000);
       void loadData();
     } catch (error) {
-      setPageError(getErrorMessage(error, "No se pudo enviar la solicitud de crédito."));
+      setPageError(
+        getErrorMessage(error, "No se pudo enviar la solicitud de crédito."),
+      );
     }
   };
 
@@ -143,13 +148,15 @@ export default function DashboardClient() {
       await createCreditRequest({
         monto: data.amount,
         type: "INVERSION",
-        creditType: null,   // ✅ no aplica para inversiones
+        creditType: null, // ✅ no aplica para inversiones
       });
       setInvestmentSuccess(true);
       setTimeout(() => setInvestmentSuccess(false), 5000);
       void loadData();
     } catch (error) {
-      setPageError(getErrorMessage(error, "No se pudo registrar la inversión."));
+      setPageError(
+        getErrorMessage(error, "No se pudo registrar la inversión."),
+      );
     }
   };
 

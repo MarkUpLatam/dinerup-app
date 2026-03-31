@@ -1,4 +1,4 @@
-import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "./config";
+import { AUTH_TOKEN_KEY, AUTH_USER_KEY } from "../config";
 
 const LEGACY_TOKEN_KEYS = ["access_token", "accessToken", "token"] as const;
 

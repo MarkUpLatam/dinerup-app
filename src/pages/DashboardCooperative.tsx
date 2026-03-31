@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { FileText, TrendingUp, Clock, User } from "lucide-react";
 import type { ReactNode } from "react";
 
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import PreApprovalModal from "../components/PreApprovalModal";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import PreApprovalModal from "../components/credit/PreApprovalModal";
 
 import {
   getMyCooperativeRequests,

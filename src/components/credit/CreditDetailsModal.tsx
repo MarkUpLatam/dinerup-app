@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { X, DollarSign, TrendingUp, Building2, Loader, CheckCircle } from "lucide-react";
-import type { CreditRequest, CreditRequestCooperative } from "../types/credit";
-import { CreditEstado } from "../types/creditEstado";
-import { getCreditRequestCooperatives, acceptCreditCooperative } from "../api/creditRequests.api";
-import GuaranteeOnboardingModal from "./GuaranteeOnboardingModal";
+import type { CreditRequest, CreditRequestCooperative } from "../../types/credit";
+import { CreditEstado } from "../../types/creditEstado";
+import { getCreditRequestCooperatives, acceptCreditCooperative } from "../../api/creditRequests.api";
+import GuaranteeOnboardingModal from "../onboarding/GuaranteeOnboardingModal";
 
 interface CreditDetailsModalProps {
   open: boolean;

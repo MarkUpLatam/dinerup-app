@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { X, CheckCircle, AlertCircle } from "lucide-react";
-import Step1Identity from "../pages/steps/Step1Identity";
-import Step2PersonalDetails from "../pages/steps/Step2PersonalDetails";
-import Step3Address from "../pages/steps/Step3Address";
-import Step4Economic from "../pages/steps/Step4Economic";
-import Step4Review from "../pages/steps/Step4Review";
-import { submitGuaranteeOnboarding, type OnboardingPayload, type SolicitanteData } from "../api/onboarding.api";
+import Step1Identity from "../../pages/steps/Step1Identity";
+import Step2PersonalDetails from "../../pages/steps/Step2PersonalDetails";
+import Step3Address from "../../pages/steps/Step3Address";
+import Step4Economic from "../../pages/steps/Step4Economic";
+import Step4Review from "../../pages/steps/Step4Review";
+import { submitGuaranteeOnboarding, type OnboardingPayload, type SolicitanteData } from "../../api/onboarding.api";
 
 interface GuaranteeOnboardingModalProps {
   open: boolean;

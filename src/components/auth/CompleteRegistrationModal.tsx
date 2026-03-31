@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { completeRegistration } from "../../api/auth.api";
+import { completeRegistration } from "../../api/auth/auth.api";
 import { getErrorMessage } from "../../api/errors";
 
 type Props = {

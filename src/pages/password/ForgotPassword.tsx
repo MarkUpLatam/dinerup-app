@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { forgotPassword } from "../../api/auth.api";
+import { forgotPassword } from "../../api/auth/auth.api";
 import { getErrorMessage } from "../../api/errors";
 
 export default function ForgotPassword() {

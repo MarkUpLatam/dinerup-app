@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { activateAccount } from "../api/auth.api";
+import { activateAccount } from "../api/auth/auth.api";
 import { getErrorMessage } from "../api/errors";
 
 type Status = "loading" | "success" | "error";

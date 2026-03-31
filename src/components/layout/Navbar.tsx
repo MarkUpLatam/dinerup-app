@@ -1,7 +1,7 @@
 import { LogOut } from "lucide-react";
-import { useAuth } from "../context/useAuth";
+import { useAuth } from "../../context/useAuth";
 import { useNavigate } from "react-router-dom";
-import logo from "../images/LogoDinerop.png";
+import logo from "../../images/LogoDinerop.png";
 
 export default function Navbar() {
   const { user, logout } = useAuth();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { resetPassword } from "../../api/auth.api";
+import { resetPassword } from "../../api/auth/auth.api";
 import { getErrorMessage } from "../../api/errors";
 
 type Status = "idle" | "loading" | "success" | "error";

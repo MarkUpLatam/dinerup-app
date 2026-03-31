@@ -5,7 +5,7 @@ import {
   Phone,
   Star,
 } from "lucide-react";
-import type { Cooperative } from "../types/cooperative";
+import type { Cooperative } from "../../types/cooperative";
 
 interface CooperativeCardProps {
   cooperative: Cooperative;

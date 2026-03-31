@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import AlianzaDelValle from "../images/cooperatives/AlianzaDelValle.png";
-import Tulcan from "../images/cooperatives/Tulcan.png";
-import UnionElEjido from "../images/cooperatives/UnionElEjido.png";
+import AlianzaDelValle from "../../images/cooperatives/AlianzaDelValle.png";
+import Tulcan from "../../images/cooperatives/Tulcan.png";
+import UnionElEjido from "../../images/cooperatives/UnionElEjido.png";
 
 interface Cooperative {
   logo: string;
