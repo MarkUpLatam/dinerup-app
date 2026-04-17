@@ -1,10 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function PlatformVisitsCounter() {
   const [count, setCount] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const target = 2000;
 
+  // Arranca la animación solo cuando el elemento es visible en pantalla
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasStarted) {
+          setHasStarted(true);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasStarted]);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+
     let start = 0;
     const duration = 1500;
     const increment = target / (duration / 16);
@@ -20,10 +42,10 @@ export default function PlatformVisitsCounter() {
     }, 16);
 
     return () => clearInterval(counter);
-  }, []);
+  }, [hasStarted]);
 
   return (
-    <div className="text-center mt-6">
+    <div ref={ref} className="text-center mt-6">
       <h3 className="text-white font-semibold text-sm tracking-wide uppercase mb-3">
         Visitantes
       </h3>
