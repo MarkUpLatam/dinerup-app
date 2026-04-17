@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { httpClient } from "../../api/httpClient";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 const SESSION_KEY = "dinerop_visit_registered";
 
 export default function PlatformVisitsCounter() {
@@ -16,19 +16,14 @@ export default function PlatformVisitsCounter() {
     const fetchTotal = async () => {
       try {
         if (alreadyRegistered) {
-          // Ya visitó en esta sesión: solo consulta el total actual
-          const res = await fetch(`${BASE_URL}/api/visits`);
-          const data = await res.json();
+          const data = await httpClient<{ total: number }>("/api/visits", { auth: false });
           setCount(data.total);
         } else {
-          // Primera vez en esta sesión: registra la visita y suma 1
-          const res = await fetch(`${BASE_URL}/api/visits`, { method: "POST" });
-          const data = await res.json();
+          const data = await httpClient<{ total: number }>("/api/visits", { method: "POST", auth: false });
           sessionStorage.setItem(SESSION_KEY, "true");
           setCount(data.total);
         }
       } catch {
-        // Si falla la red, muestra 2000 como fallback
         setCount(2000);
       }
     };
@@ -36,7 +31,7 @@ export default function PlatformVisitsCounter() {
     fetchTotal();
   }, []);
 
-  // 2. Cuando el elemento entra en pantalla Y ya tenemos el total: arrancar animación
+  // 2. Arrancar animación cuando el elemento es visible y ya tenemos el total
   useEffect(() => {
     if (count === null || hasAnimated) return;
     const el = ref.current;
