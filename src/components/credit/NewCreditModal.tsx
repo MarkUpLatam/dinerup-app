@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { X, AlertCircle, DollarSign, Tag } from "lucide-react";
+import { X, AlertCircle, DollarSign, Tag, MapPin, ChevronDown } from "lucide-react";
+import { ecuadorProvinces } from "../../data/ecuadorProvinces";
 
 interface NewCreditModalProps {
   open: boolean;
@@ -21,7 +22,29 @@ export default function NewCreditModal({
 }: NewCreditModalProps) {
   const [amount, setAmount] = useState<string>("");
   const [creditType, setCreditType] = useState<string>("PERSONAL");
+  const [province, setProvince] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [parroquia, setParroquia] = useState<string>("");
   const [errors, setErrors] = useState<{ amount?: string }>({});
+
+  const selectedProvinciaData = ecuadorProvinces.Ecuador.find(
+    (p) => p.provincia === province
+  );
+
+  const selectedCantonData = selectedProvinciaData?.cantones.find(
+    (c) => c.nombre === city
+  );
+
+  const handleProvinceChange = (val: string) => {
+    setProvince(val);
+    setCity("");
+    setParroquia("");
+  };
+
+  const handleCityChange = (val: string) => {
+    setCity(val);
+    setParroquia("");
+  };
 
   const handleSubmit = () => {
     const newErrors: { amount?: string } = {};
@@ -35,28 +58,36 @@ export default function NewCreditModal({
       return;
     }
 
+    // El onSubmit se mantiene exactamente igual que antes
     onSubmit({
       amount: parseFloat(amount),
       type: creditType,
     });
 
-    // Reset form
+    // Reset
     setAmount("");
     setCreditType("PERSONAL");
+    setProvince("");
+    setCity("");
+    setParroquia("");
     setErrors({});
     onClose();
   };
 
   if (!open) return null;
 
+  const selectClass = (hasError?: boolean) =>
+    `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition appearance-none bg-white ${
+      hasError ? "border-red-500 focus:ring-red-500" : "border-gray-300"
+    }`;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Solicitar Crédito
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800">Solicitar Crédito</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -67,6 +98,7 @@ export default function NewCreditModal({
 
         {/* Content */}
         <div className="p-6 space-y-5">
+
           {/* Info Banner */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -74,8 +106,7 @@ export default function NewCreditModal({
               <p className="font-semibold mb-1">Tu solicitud será enviada a:</p>
               <p>
                 Todas las cooperativas de tu ciudad. Estaremos atentos para
-                notificarte por correo o en la plataforma cuando recibas
-                respuestas.
+                notificarte por correo o en la plataforma cuando recibas respuestas.
               </p>
             </div>
           </div>
@@ -93,17 +124,13 @@ export default function NewCreditModal({
               value={amount}
               onChange={(e) => {
                 setAmount(e.target.value);
-                if (errors.amount) {
-                  setErrors({ ...errors, amount: undefined });
-                }
+                if (errors.amount) setErrors({});
               }}
               placeholder="Ej: 5000"
               min="0"
               step="100"
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                errors.amount
-                  ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
+                errors.amount ? "border-red-500 focus:ring-red-500" : "border-gray-300"
               }`}
             />
             {errors.amount && (
@@ -111,7 +138,8 @@ export default function NewCreditModal({
             )}
             {amount && (
               <p className="text-xs text-gray-500 mt-2">
-                Monto: ${parseFloat(amount).toLocaleString("es-EC", {
+                Monto: $
+                {parseFloat(amount).toLocaleString("es-EC", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
@@ -127,20 +155,93 @@ export default function NewCreditModal({
                 Tipo de crédito
               </div>
             </label>
-            <select
-              value={creditType}
-              onChange={(e) => setCreditType(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition"
-            >
-              {creditTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={creditType}
+                onChange={(e) => setCreditType(e.target.value)}
+                className={selectClass()}
+              >
+                {creditTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            </div>
           </div>
 
-          {/* Mensaje Adicional */}
+          {/* Ubicación — solo visual, no afecta el submit */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-600" />
+                Ubicación
+              </div>
+            </label>
+            <div className="space-y-3">
+
+              {/* Provincia */}
+              <div className="relative">
+                <select
+                  value={province}
+                  onChange={(e) => handleProvinceChange(e.target.value)}
+                  className={selectClass()}
+                >
+                  <option value="">Selecciona una provincia</option>
+                  {ecuadorProvinces.Ecuador.map((p) => (
+                    <option key={p.provincia} value={p.provincia}>
+                      {p.provincia}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+
+              {/* Cantón — se habilita al elegir provincia */}
+              <div className="relative">
+                <select
+                  value={city}
+                  onChange={(e) => handleCityChange(e.target.value)}
+                  disabled={!province}
+                  className={`${selectClass()} disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed`}
+                >
+                  <option value="">
+                    {province ? "Selecciona un cantón" : "Primero elige una provincia"}
+                  </option>
+                  {selectedProvinciaData?.cantones.map((c) => (
+                    <option key={c.nombre} value={c.nombre}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+
+              {/* Parroquia — se habilita al elegir cantón */}
+              <div className="relative">
+                <select
+                  value={parroquia}
+                  onChange={(e) => setParroquia(e.target.value)}
+                  disabled={!city}
+                  className={`${selectClass()} disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed`}
+                >
+                  <option value="">
+                    {city ? "Selecciona una parroquia" : "Primero elige un cantón"}
+                  </option>
+                  {selectedCantonData?.parroquias.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+
+            </div>
+          </div>
+
+          {/* Aviso */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <p className="text-xs text-amber-800">
               <strong>Importante:</strong> Una vez envíes esta solicitud, no
@@ -148,6 +249,7 @@ export default function NewCreditModal({
               correctos.
             </p>
           </div>
+
         </div>
 
         {/* Footer */}
@@ -166,6 +268,7 @@ export default function NewCreditModal({
             Enviar Solicitud
           </button>
         </div>
+
       </div>
     </div>
   );

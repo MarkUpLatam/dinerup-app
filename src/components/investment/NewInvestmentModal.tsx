@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { X, DollarSign } from "lucide-react";
+import { X, DollarSign, MapPin, ChevronDown } from "lucide-react";
+import { ecuadorProvinces } from "../../data/ecuadorProvinces";
 
 interface NewInvestmentModalProps {
   open: boolean;
@@ -13,7 +14,28 @@ export default function NewInvestmentModal({
   onSubmit,
 }: NewInvestmentModalProps) {
   const [amount, setAmount] = useState<string>("");
+  const [province, setProvince] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [parroquia, setParroquia] = useState<string>("");
   const [errors, setErrors] = useState<{ amount?: string }>({});
+
+  const selectedProvinciaData = ecuadorProvinces.Ecuador.find(
+    (p) => p.provincia === province
+  );
+  const selectedCantonData = selectedProvinciaData?.cantones.find(
+    (c) => c.nombre === city
+  );
+
+  const handleProvinceChange = (val: string) => {
+    setProvince(val);
+    setCity("");
+    setParroquia("");
+  };
+
+  const handleCityChange = (val: string) => {
+    setCity(val);
+    setParroquia("");
+  };
 
   const handleSubmit = () => {
     const newErrors: { amount?: string } = {};
@@ -33,6 +55,9 @@ export default function NewInvestmentModal({
 
     // Reset form
     setAmount("");
+    setProvince("");
+    setCity("");
+    setParroquia("");
     setErrors({});
     onClose();
   };
@@ -94,6 +119,76 @@ export default function NewInvestmentModal({
                 })}
               </p>
             )}
+          </div>
+
+          {/* Ubicación — solo visual, no afecta el submit */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-600" />
+                Ubicación
+              </div>
+            </label>
+            <div className="space-y-3">
+
+              {/* Provincia */}
+              <div className="relative">
+                <select
+                  value={province}
+                  onChange={(e) => handleProvinceChange(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition appearance-none bg-white"
+                >
+                  <option value="">Selecciona una provincia</option>
+                  {ecuadorProvinces.Ecuador.map((p) => (
+                    <option key={p.provincia} value={p.provincia}>
+                      {p.provincia}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+
+              {/* Cantón */}
+              <div className="relative">
+                <select
+                  value={city}
+                  onChange={(e) => handleCityChange(e.target.value)}
+                  disabled={!province}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition appearance-none bg-white disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  <option value="">
+                    {province ? "Selecciona un cantón" : "Primero elige una provincia"}
+                  </option>
+                  {selectedProvinciaData?.cantones.map((c) => (
+                    <option key={c.nombre} value={c.nombre}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+
+              {/* Parroquia */}
+              <div className="relative">
+                <select
+                  value={parroquia}
+                  onChange={(e) => setParroquia(e.target.value)}
+                  disabled={!city}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition appearance-none bg-white disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                >
+                  <option value="">
+                    {city ? "Selecciona una parroquia" : "Primero elige un cantón"}
+                  </option>
+                  {selectedCantonData?.parroquias.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+
+            </div>
           </div>
 
           {/* Info */}

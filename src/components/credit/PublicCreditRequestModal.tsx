@@ -109,6 +109,7 @@ function SectionCard({ title, icon, children }: SectionCardProps) {
     </div>
   );
 }
+
 /* ================= COMPONENTE Para que se reinicien los campos ================= */
 
 const getInitialFormState = (type: "CREDITO" | "INVERSION"): FormData => ({
@@ -133,25 +134,42 @@ export default function PublicCreditRequestModal({
   type,
 }: PublicCreditRequestModalProps) {
   const [formData, setFormData] = useState<FormData>(getInitialFormState(type));
+  // canton y parroquia son estados visuales intermedios — solo canton se envía como "city"
+  const [canton, setCanton] = useState<string>("");
+  const [parroquia, setParroquia] = useState<string>("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showFullTerms, setShowFullTerms] = useState(false);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const resetForm = () => {
     setFormData(getInitialFormState(type));
+    setCanton("");
+    setParroquia("");
     setErrors({});
     setAcceptedTerms(false);
     setShowFullTerms(false);
   };
 
-  const availableCities = useMemo(() => {
+  // Cantones disponibles según provincia seleccionada
+  const availableCantones = useMemo(() => {
     const provinceData = ecuadorProvinces.Ecuador.find(
       (p) => p.provincia === formData.province,
     );
-    return provinceData ? provinceData.ciudades : [];
+    return provinceData ? provinceData.cantones : [];
   }, [formData.province]);
+
+  // Parroquias disponibles según cantón seleccionado
+  const availableParroquias = useMemo(() => {
+    const provinceData = ecuadorProvinces.Ecuador.find(
+      (p) => p.provincia === formData.province,
+    );
+    if (!provinceData) return [];
+    const cantonData = provinceData.cantones.find((c) => c.nombre === canton);
+    return cantonData ? cantonData.parroquias : [];
+  }, [formData.province, canton]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -215,6 +233,14 @@ export default function PublicCreditRequestModal({
         if (Number(finalValue) > 60) finalValue = "60";
         break;
 
+      case "province":
+        // Al cambiar provincia, resetear cantón, parroquia y city
+        setCanton("");
+        setParroquia("");
+        setFormData((prev) => ({ ...prev, province: finalValue, city: "" }));
+        if (errors["province"]) setErrors((prev) => ({ ...prev, province: "" }));
+        return;
+
       default:
         break;
     }
@@ -227,6 +253,19 @@ export default function PublicCreditRequestModal({
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+  };
+
+  // Cantón: estado visual + se guarda en formData.city (es lo que se envía al backend)
+  const handleCantonChange = (val: string) => {
+    setCanton(val);
+    setParroquia("");
+    setFormData((prev) => ({ ...prev, city: val }));
+    if (errors["city"]) setErrors((prev) => ({ ...prev, city: "" }));
+  };
+
+  // Parroquia: solo estado visual, no se envía al backend
+  const handleParroquiaChange = (val: string) => {
+    setParroquia(val);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -259,6 +298,11 @@ export default function PublicCreditRequestModal({
   };
 
   if (!open) return null;
+
+  const selectClass = (hasError?: boolean, disabled?: boolean) =>
+    `w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition
+    ${disabled ? "bg-gray-100 cursor-not-allowed opacity-70" : ""}
+    ${hasError ? "border-red-400 focus:ring-red-500" : "border-gray-300 focus:ring-brand-secondary"}`;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -340,23 +384,17 @@ export default function PublicCreditRequestModal({
             title="Ubicación"
             icon={<MapPin className="w-5 h-5 text-brand-secondary" />}
           >
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               {/* PROVINCIA */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   Provincia
                 </label>
-
                 <select
                   name="province"
                   value={formData.province}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition
-      ${
-        errors.province
-          ? "border-red-400 focus:ring-red-500"
-          : "border-gray-300 focus:ring-brand-secondary"
-      }`}
+                  className={selectClass(!!errors.province)}
                 >
                   <option value="">Selecciona una provincia</option>
                   {ecuadorProvinces.Ecuador.map((p) => (
@@ -365,49 +403,60 @@ export default function PublicCreditRequestModal({
                     </option>
                   ))}
                 </select>
-
                 {errors.province && (
                   <p className="text-xs text-red-600">{errors.province}</p>
                 )}
               </div>
 
-              {/* PARROQUIAS */}
+              {/* CANTÓN */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Cantón
+                </label>
+                <select
+                  value={canton}
+                  onChange={(e) => handleCantonChange(e.target.value)}
+                  disabled={!formData.province}
+                  className={selectClass(!!errors.city, !formData.province)}
+                >
+                  <option value="">
+                    {formData.province
+                      ? "Selecciona un cantón"
+                      : "Primero elige una provincia"}
+                  </option>
+                  {availableCantones.map((c) => (
+                    <option key={c.nombre} value={c.nombre}>
+                      {c.nombre}
+                    </option>
+                  ))}
+                </select>
+                {errors.city && (
+                  <p className="text-xs text-red-600">{errors.city}</p>
+                )}
+              </div>
+
+              {/* PARROQUIA */}
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700">
                   Parroquia
                 </label>
-
                 <select
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  disabled={!formData.province}
-                  className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition
-            ${
-              !formData.province
-                ? "bg-gray-100 cursor-not-allowed opacity-70"
-                : ""
-            }
-            ${
-              errors.city
-                ? "border-red-400 focus:ring-red-500"
-                : "border-gray-300 focus:ring-brand-secondary"
-            }`}
+                  value={parroquia}
+                  onChange={(e) => handleParroquiaChange(e.target.value)}
+                  disabled={!canton}
+                  className={selectClass(false, !canton)}
                 >
                   <option value="">
-                    {formData.province
+                    {canton
                       ? "Selecciona una parroquia"
-                      : "Primero selecciona provincia"}
+                      : "Primero elige un cantón"}
                   </option>
-
-                  {availableCities.map((c) => (
-                    <option key={c}>{c}</option>
+                  {availableParroquias.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
                   ))}
                 </select>
-
-                {errors.city && (
-                  <p className="text-xs text-red-600">{errors.city}</p>
-                )}
               </div>
             </div>
           </SectionCard>

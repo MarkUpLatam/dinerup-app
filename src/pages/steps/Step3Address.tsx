@@ -14,9 +14,13 @@ export default function Step3Address({ data, setData, nextStep, prevStep }) {
         [name]: value,
       };
 
-      // Si cambia la provincia, resetear cantón
+      // Resetear en cascada
       if (name === "provincia") {
         newDireccion.canton = "";
+        newDireccion.barrio = "";
+      }
+      if (name === "canton") {
+        newDireccion.barrio = "";
       }
 
       return {
@@ -29,14 +33,24 @@ export default function Step3Address({ data, setData, nextStep, prevStep }) {
     });
   };
 
-  const getAvailableCitiesCantons = () => {
+  const getAvailableCantones = () => {
     if (!direccion.provincia) return [];
-
     const provinciaObj = provinces.find(
       (p) => p.provincia === direccion.provincia
     );
+    return provinciaObj ? provinciaObj.cantones.map((c) => c.nombre) : [];
+  };
 
-    return provinciaObj ? provinciaObj.ciudades : [];
+  const getAvailableParroquias = () => {
+    if (!direccion.provincia || !direccion.canton) return [];
+    const provinciaObj = provinces.find(
+      (p) => p.provincia === direccion.provincia
+    );
+    if (!provinciaObj) return [];
+    const cantonObj = provinciaObj.cantones.find(
+      (c) => c.nombre === direccion.canton
+    );
+    return cantonObj ? cantonObj.parroquias : [];
   };
 
   return (
@@ -55,20 +69,23 @@ export default function Step3Address({ data, setData, nextStep, prevStep }) {
         />
 
         <Select
-          label="Cantón/Ciudad *"
+          label="Cantón *"
           name="canton"
           value={direccion.canton}
           onChange={handleChange}
-          options={getAvailableCitiesCantons()}
+          options={getAvailableCantones()}
           disabled={!direccion.provincia}
+          placeholder={!direccion.provincia ? "Primero elige una provincia" : "Seleccione..."}
         />
 
-        <Input
-          label="Barrio/Parroquia *"
+        <Select
+          label="Parroquia *"
           name="barrio"
           value={direccion.barrio}
           onChange={handleChange}
-          placeholder="Ej: Centro"
+          options={getAvailableParroquias()}
+          disabled={!direccion.canton}
+          placeholder={!direccion.canton ? "Primero elige un cantón" : "Seleccione..."}
         />
 
         <Input
@@ -141,7 +158,7 @@ function Input({ label, value, ...props }) {
   );
 }
 
-function Select({ label, value, options, disabled, ...props }) {
+function Select({ label, value, options, disabled, placeholder, ...props }) {
   return (
     <div>
       <label className="text-gray-700 font-medium mb-1">{label}</label>
@@ -152,7 +169,7 @@ function Select({ label, value, options, disabled, ...props }) {
         className="w-full px-4 py-3 border rounded-xl bg-gray-50
         focus:ring-2 focus:ring-primary-600 transition outline-none disabled:opacity-50"
       >
-        <option value="">Seleccione...</option>
+        <option value="">{placeholder || "Seleccione..."}</option>
         {options.map((o) => (
           <option key={o} value={o}>
             {o}
