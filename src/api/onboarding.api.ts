@@ -53,9 +53,10 @@ export interface OnboardingPayload {
 }
 
 export interface OnboardingSubmitResponse {
-  status: string;
-  message: string;
-  id?: string;
+  id: number;
+  estado: string;
+  destinoCredito: string;
+  fechaCreacion: string;
 }
 
 export async function submitOnboarding(

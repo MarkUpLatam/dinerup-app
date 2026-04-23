@@ -260,11 +260,15 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
                               className={`px-3 py-1 rounded-lg font-semibold text-xs whitespace-nowrap ${
                                 coop.estado === "PRE_APROBADA"
                                   ? "bg-green-100 text-green-700"
-                                  : "bg-amber-100 text-amber-700"
+                                  : coop.estado === "SOLICITANDO_GARANTE"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-gray-100 text-gray-700"
                               }`}
                             >
                               {coop.estado === "PRE_APROBADA"
                                 ? "Pre aprobada"
+                                : coop.estado === "SOLICITANDO_GARANTE"
+                                ? "Solicitando garante"
                                 : coop.estado}
                             </span>
                             {coop.estado === "SOLICITANDO_GARANTE" ? (
@@ -298,47 +302,52 @@ export default function CreditDetailsModal({ open, request, onClose }: CreditDet
 
                       {/* Detalles financieros compactos */}
                       <div className="p-4 space-y-2 text-sm">
-                        <div className="flex justify-between items-center text-gray-700">
-                          <span className="text-gray-600">Plazo:</span>
-                          <span className="font-semibold">{coop.plazoMeses} meses</span>
+                      {coop.estado === "SOLICITANDO_GARANTE" ? (
+                      <div className="py-2 text-center text-amber-700 bg-amber-50 rounded-lg text-sm font-medium">
+                        La cooperativa requiere un garante para continuar con tu solicitud.
                         </div>
+                      ) : (
+                      <>
                         <div className="flex justify-between items-center text-gray-700">
+                        <span className="text-gray-600">Plazo:</span>
+                          <span className="font-semibold">{coop.plazoMeses ?? "—"} meses</span>
+                          </div>
+                          <div className="flex justify-between items-center text-gray-700">
                           <span className="text-gray-600">Tipo de Crédito:</span>
                           <span className="font-semibold">
-                            {coop.tipoCredito === "MICROCREDITO" ? "Microcrédito" : coop.tipoCredito}
-                          </span>
+                              {coop.tipoCredito === "MICROCREDITO" ? "Microcrédito" : (coop.tipoCredito ?? "—")}
+                            </span>
                         </div>
                         <div className="flex justify-between items-center text-gray-700">
-                          <span className="text-gray-600">Tasa Anual:</span>
-                          <span className="font-semibold">{coop.tasaAnual}%</span>
-                        </div>
-                        <div className="flex justify-between items-center text-gray-700">
+                        <span className="text-gray-600">Tasa Anual:</span>
+                      <span className="font-semibold">{coop.tasaAnual != null ? `${coop.tasaAnual}%` : "—"}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-gray-700">
                           <span className="text-gray-600">Cuota Mensual:</span>
-                          <span className="font-semibold">
-                            ${coop.cuotaMensual.toLocaleString("es-EC", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </span>
-                        </div>
-                        <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between items-center text-gray-700">
-                          <span className="text-gray-600">Interés Total:</span>
+                            <span className="font-semibold">
+                              {coop.cuotaMensual != null
+                              ? `$${coop.cuotaMensual.toLocaleString("es-EC", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                              : "—"}
+                        </span>
+                      </div>
+                      <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between items-center text-gray-700">
+                        <span className="text-gray-600">Interés Total:</span>
                           <span className="font-semibold text-red-600">
-                            ${coop.interesTotal.toLocaleString("es-EC", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
+                              {coop.interesTotal != null
+                                ? `$${coop.interesTotal.toLocaleString("es-EC", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                              : "—"}
                           </span>
-                        </div>
-                        <div className="flex justify-between items-center text-gray-800 font-bold">
-                          <span>Total a Pagar:</span>
-                          <span>
-                            ${coop.totalPagar.toLocaleString("es-EC", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                          </span>
-                        </div>
+                      </div>
+                      <div className="flex justify-between items-center text-gray-800 font-bold">
+                      <span>Total a Pagar:</span>
+                        <span>
+                            {coop.totalPagar != null
+                                ? `$${coop.totalPagar.toLocaleString("es-EC", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                  : "—"}
+                              </span>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   );

@@ -100,12 +100,12 @@ export default function OnboardingPage() {
 
       const response = await submitOnboarding(payload);
 
-      if (response?.status === "COMPLETED" || response?.status === "success") {
+      if (response?.estado === "COMPLETADO" || response?.id) {
         updateUser({ ...user, onboarding: true });
         setModalType("success");
         setShowModal(true);
       } else {
-        throw new Error(response?.message || "Onboarding no completado");
+        throw new Error("Onboarding no completado");
       }
     } catch (err) {
       const errorMessage = getErrorMessage(err);
